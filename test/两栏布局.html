@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="layout_contanier">
+      <div class="layout_slider"></div>
+      <div class="layout_main"></div>
+    </div>
+  </body>
+  <style>
+    @import './common.css';
+  </style>
+  <!-- <style>
+    /* 使用flex布局 */
+    .layout_contanier {
+      width: 100%;
+      height: 100vh;
+      background-color: aqua;
+      display: flex;
+    }
+    .layout_slider {
+      width: var(--base-slider-width);
+      height: 100vh;
+      background-color: aquamarine;
+    }
+    .layout_main {
+      flex: 1;
+      height: 100vh;
+      background-color: blue;
+    }
+  </style> -->
+  <style>
+    /* float布局 */
+    .layout_contanier {
+      width: 100%;
+      height: 100vh;
+      background-color: aqua;
+    }
+
+    .layout_slider {
+      width: var(--base-slider-width);
+      height: 100vh;
+      background-color: aquamarine;
+      float: left;
+    }
+    .layout_main {
+      width: calc(100% - var(--base-slider-width));
+      height: 100vh;
+      background-color: blue;
+      /* 开启BFC */
+      overflow: hidden;
+    }
+  </style>
+  <!-- <style>
+    /* 两栏布局使用定位 */
+    .layout_contanier {
+      width: 100%;
+      height: 100vh;
+      background-color: aqua;
+    }
+    .layout_slider {
+      width: var(--base-slider-width);
+      height: var(--base-slider-height);
+      background-color: aquamarine;
+    }
+    .layout_main {
+      position: absolute;
+      width: calc(100% - var(--base-slider-width));
+      height: var(--base-slider-height);
+      background-color: blue;
+      left: var(--base-slider-width);
+      top: 0;
+    }
+  </style> -->
+</html>

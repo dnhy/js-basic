@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="parent">
+      <div class="children">水平居中</div>
+    </div>
+  </body>
+  <style>
+    .parent {
+      background-color: aqua;
+      height: 200px;
+      width: 200px; /*定宽*/
+      position: relative; /*父相*/
+    }
+    .children {
+      background-color: blue;
+      width: 100px; /*定宽*/
+      height: 100px;
+      position: absolute; /* 子绝 */
+      left: 50%; /*父元素宽度一半,这里等同于left:100px*/
+      transform: translateX(-50%); /*自身宽度一半,等同于margin-left: -50px;*/
+    }
+  </style>
+</html>

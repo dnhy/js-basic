@@ -1,0 +1,1258 @@
+## 什么是vue
+
+渐进式框架：可以按需逐步添加需要的功能。vue的核心库只关注视图层
+
+![image-20241007230020903](/Users/dnhy/Library/Application Support/typora-user-images/image-20241007230020903.png)
+
+### 1.声明式渲染（核心特点）
+
+Vue.js的声明式渲染是指通过简洁的模板语法来描述页面的结构和数据绑定关系，而不需要直接操作DOM进行命令式编程。依赖于模板系统和响应式数据绑定机制（即mvvm模式）
+
+体现在模板语法、命令、api
+
+参考：
+
+https://developer.aliyun.com/article/1410549
+
+### 2.采用MVVM模式
+
+绑定数据和视图，简化了MVC模式
+
+### 3.采用虚拟dom
+
+实现跨平台
+
+减少操作dom的频率
+
+采用diff算法进行更新
+
+### 4.区分编译时和运行时
+
+编译时将模板编译成render函数，运行时只需获取虚拟dom并渲染成真实dom，以此提升性能
+
+### 5.组件化
+
+高内聚低耦合
+
+降低更新范围，只重新渲染变化的组件
+
+## MVC
+
+常用于后端、前后端不分离的情况，从数据库获取数据并渲染到页面上
+
+- 控制层（control）：业务逻辑(在用户请求资源后调用service中的方法获取数据)
+- 服务层（service) ：去调用model中的方法把数据查出来返回给页面
+- 数据层/持久层（Model）：数据模型(model直接查数据库)
+- 视图层（View）：应用的展示效果，各类UI组件
+
+## MVVM
+
+MVC应用到前端时需要写很多controller，使用MVVM将数据与视图绑定可以简化MVC
+
+- 数据层（Model）：应用的数据及数据操作逻辑
+- 视图层（View）：应用的展示效果，各类UI组件
+- 业务逻辑层（ViewModel）：框架封装的核心，它负责将数据与视图关联起来
+
+**理解ViewModel**
+
+它的主要职责就是：
+
+- 数据变化后更新视图
+- 视图变化后更新数据
+
+当然，它还有两个主要部分组成
+
+- 监听器（Observer）：对所有数据的属性进行监听
+- 解析器（Compiler）：对每个元素节点的指令进行扫描跟解析,根据指令模板替换数据,以及绑定相应的更新函数
+
+## 模板渲染逻辑
+
+### 挂载阶段
+
+*extra：调用 `beforeMount:`钩子在挂载开始之前，Vue 会调用 `beforeMount` 钩子。这一阶段表示模板编译完成，即将开始将虚拟 DOM 挂载到真实 DOM 上。*
+
+1.在编译打包时将模板编译成render函数，render函数返回一个虚拟dom树。
+
+2.在浏览器运行时调用render函数生成虚拟dom树（虚拟 DOM 树是一个 JavaScript 对象树，每个节点称为 VNode，vNode由h函数生成）。
+
+3.vue将虚拟dom转换成真实dom挂载到指定的dom元素上。
+
+*extra：调用 `mounted` 钩子：挂载完成后，Vue 会调用 `mounted` 钩子。这一阶段表示组件已经挂载到 DOM 上，可以进行 DOM 操作和数据获取。*
+
+### 更新阶段
+
+1.组件数据发生变化，Vue检测到这些变化触发更新流程
+
+*extra：调用 `beforeUpdate` 钩子在更新开始之前，Vue 会调用 `beforeUpdate` 钩子。这一阶段表示数据已经发生变化，即将开始重新渲染组件。*
+
+2.调用之前编译好的渲染函数生成新的虚拟dom树
+
+3.使用diff算法比较新旧虚拟dom树，找出需要更新的部分
+
+4.将变化应用到真实dom上，完成dom更新。
+
+*extra：调用 `updated` 钩子：更新完成后，Vue 会调用 `updated` 钩子。这一阶段表示组件已经重新渲染完成，可以进行 DOM 操作和数据获取。*
+
+### 销毁阶段
+
+*extra：调用 `beforeDestroy` 钩子在组件销毁之前，Vue 会调用 `beforeDestroy` 钩子。这一阶段表示组件即将被销毁，可以进行一些清理工作。*
+
+1.销毁组件实例，移除事件监听器和子组件。
+
+*extra：调用 `destroyed` 钩子：销毁完成后，Vue 会调用 `destroyed` 钩子。这一阶段表示组件已经完全销毁，不再可用*
+
+参考：
+
+https://blog.csdn.net/My_wife_QBL/article/details/140171606
+
+## 虚拟DOM
+
+优点：
+
+1.Virtual DOM就是用js对象描述真实DOM。由于直接操作DOM性能较差，可将DOM操作转成对象操作，最终通过diff算法比对差异进行更新DOM
+
+2.虚拟DOM不依赖真实平台环境也可以实现跨平台。
+
+如何生成：
+
+1.template编译为render函数
+
+2.浏览器挂载dom过程中调用render函数返回的就是VDOM
+
+3.后续的patch过程中进一步转化为真实dom
+
+如何diff：
+
+1.挂载结束后，会记录第一次生成的VDOM - oldVNode
+
+2.当响应式数据发生变化时，再次重新调用组件的render函数，生成新的VDOM -newVNode
+
+3.对oldVNode和newVNode做diff操作，将更改的部分应用到真实DOM上。这样可以做到最小量的dom操作，高效更新视图。
+
+## Vue组件化
+
+组成：
+
+模板、属性、事件、插槽、生命周期
+
+好处：
+
+1.高内聚、可重用、可组合
+
+2.vue组件降低更新范围，只重新渲染变化的组件
+
+- vue每个组件都有一个渲染函数watcher（vue2）、effect（vue3）
+- 数据是响应式的，就是说数据变化后会自动执行watcher或者effect
+- 组件要合理划分，不拆分会要整个页面都更新，拆分过细会导致watcher、effect产生过多，调用过多也会造成性能浪费
+
+> 既然vue通过数据劫持可以精准探测数据变化，为什么还需要dom进行diff检测差异？
+>
+> vue内部设计原因：vue是每个组件一个watcher，未采用一个属性一个watcher（大量watcher产生浪费内存）。使用组建级watcher之后，属性变化会导致当前所属组件的整体更新，组件的更新就采用虚拟dom+diff算法比对进行优化。
+
+## Vue3响应式原理
+
+### 什么是响应式
+
+响应式是一个过程，存在触发者（数据），响应者（引用数据的函数）
+
+当数据改变时，引用数据的函数(effect副作用函数)响应数据的改变，重新执行
+
+### 核心原理
+
+1.响应式是一个过程，存在触发者（数据），响应者（引用数据的函数）
+
+2.当数据改变时，引用数据的函数响应数据的改变，重新执行
+
+3.通过Proxy代理源数据
+
+4.通过Proxy的自定义set操作自动执行副作用函数修改dom
+
+概括：
+
+Vue使用发布订阅模式，首次挂载时先进行**依赖收集**，收集依赖和对应的副作用函数；当数据改变时，触发副作用函数修改dom。
+
+vue3使用Proxy代替Object.defineProperty进行**数据代理**，并对目标对象中的属性进行数据劫持：通过自定义的get操作进行依赖收集，通过set操作触发副作用函数修改dom
+
+其他问题：
+
+1）Proxy只会代理对象的第一层，那么Vue3又是怎样处理这个问题的呢？
+
+　　判断当前Reflect.get的返回值是否为Object，如果是则再通过reactive方法做代理， 这样就实现了深度观测。
+
+2）监测数组的时候可能触发多次get/set，那么如何防止触发多次呢？
+
+　　我们可以判断key是否为当前被代理对象target自身属性，也可以判断旧值与新值是否相等，只有满足以上两个条件之一时，才有可能执行trigger。
+
+## 响应式数据的理解/vue2和vue3响应式数据对比
+
+### 如何进行数据劫持
+
+vue2对象采用defineReactive，通过Object.defineProperty劫持属性，添加get和set函数重写属性（只能对已经存在的属性进行劫持）；数组采用重写数组的方法来实现；多层对象通过递归实现。
+
+vue3采用proxy
+
+### vue2缺陷
+
+1.Object.defineProperty进行数据劫持重写属性性能差
+
+2.当新增和删除属性时无法监控变化，需要通过$set、$delete实现
+
+3.数组不采用Object.defineProperty劫持（原因是浪费性能，会对所有索引进行劫持），导致需要对数组进行单独处理
+
+4.对ES6中新产生的Map和Set这些数据结构不支持。
+
+使用注意点：
+
+1.数据层级不要太深，不然重复递归影响性能
+
+2.不要过多触发get函数，可以先把响应式数据的值赋值给一个新的值，用新值计算后再赋值给响应式数据
+
+### vue2与vue3实现对比
+
+Vue2：
+
+```js
+let obj = { name: 'test', age: 14, n: { num: 123 } }
+function observer(data) {
+  if (typeof data !== 'object' || data === null) {
+    return data
+  }
+
+  for (const key in data) {
+    defineReactive(data, key, data[key])
+  }
+}
+
+function defineReactive(target, key, value) {
+  //对属性值为对象的进行递归劫持
+  observer(value)
+  Object.defineProperty(target, key, {
+    get() {
+      return value
+    },
+    set(newValue) {
+      if (value !== newValue) {
+        value = newValue
+        // 对新的值进行劫持
+        observer(value)
+      }
+    }
+  })
+}
+
+observer(obj)
+obj.name = {
+  inner: 21212
+}
+console.log('obj', obj)
+```
+
+Vue3：
+
+```js
+let obj = { name: 'test', age: 14, n: { num: 123 } }
+
+let handler = {
+  get(target, p, receiver) {
+    let temp = target[p]
+    if (typeof temp === 'object' && temp !== null) {
+      return new Proxy(temp, handler)
+    }
+    return Reflect.get(target, p)
+  },
+  set(target, p, newValue, receiver) {
+    Reflect.set(target, p, newValue)
+  }
+}
+
+function reactive(target) {
+  return new Proxy(target, handler)
+}
+
+let p = reactive(obj)
+// 懒代理：不去访问对象不会进行代理
+console.log('p :', p)
+console.log(p.n)
+```
+
+
+
+## vue中如何检测数组的变化
+
+### vue2处理
+
+数组处于性能原因没有使用defineProperty对数组中每一项进行拦截，而是选择重新数组变异方法（push、shift、pop、splice、unshift、sort、reverse），从而劫持用户调用这些方法的操作，对视图进行更新。数组中如果是对象类型调用这些方法也会递归进行劫持。
+
+> 变异方法是指能改变原数组的方法
+
+由于只重写了方法劫持调用变异方法的操作而没有劫持每一项，所以数组的索引和长度变化是无法监控到的，需要通过vm.$set、vm.$delete实现
+
+```js
+let obj = { name: 'test', age: 14, n: { num: 123 }, arr: [12, 'wqwq', 2132321] }
+
+let newArrayProto = Object.create(Array.prototype)
+let oldArrayProto = Array.prototype
+// 函数劫持，对数组的变异方法进行重写,覆盖newArrayProto原型链上的方法
+;['pop', 'push', 'shift', 'unshift', 'splice', 'sort', 'reverse'].forEach((method) => {
+  newArrayProto[method] = function (...args) {
+    // 调用老的数组方法
+    console.log('调用了' + method)
+    oldArrayProto[method].apply(this, args)
+  }
+})
+
+function observer(data) {
+  if (typeof data !== 'object' || data === null) {
+    return data
+  }
+  //   Array.isArray(data)
+  if (data instanceof Array) {
+    // data.__proto__ = newArrayProto
+    Object.setPrototypeOf(data, newArrayProto)
+  } else {
+    for (const key in data) {
+      defineReactive(data, key, data[key])
+    }
+  }
+}
+
+function defineReactive(target, key, value) {
+  observer(value)
+  Object.defineProperty(target, key, {
+    get() {
+      return value
+    },
+    set(newValue) {
+      if (value !== newValue) {
+        value = newValue
+        // 对新的值进行劫持
+        observer(value)
+      }
+    }
+  })
+}
+
+observer(obj)
+
+obj.name = {
+  inner: 21212
+}
+console.log('obj', obj)
+
+console.log('obj.arr :', obj.arr)
+obj.arr.unshift(123)
+console.log('obj.arr :', obj.arr)
+
+```
+
+### vue3处理
+
+无需另外处理，直接proxy处理，可以直接监测的索引和长度变化
+
+## Vue的生命周期
+
+### 生命周期选项
+
+beforeCreate
+
+组件初始化完成，props被解析后立即调用，data选项还未处理，拿不到data选项数据
+
+使用场景：编写三方插件（如vuex、vueRouter）时，共享属性和方法做mixin操作
+
+created
+
+组件处理完所有与状态相关的选项后调用，响应式数据、计算属性、方法和侦听器被配置完成。但组件还未挂载，$el属性还不可用。
+
+使用场景：服务端（不涉及dom渲染，不支持mounted钩子），可以调接口
+
+beforeMount
+
+组件挂载之前调用，还未创建dom节点
+
+使用场景：使用较少
+
+mounted
+
+组件挂载之后调用，可以操作dom
+
+使用场景：可以调接口，获取dom元素
+
+beforeUpdate
+
+组件即将因为响应式状态改变而更新dom树之前调用
+
+使用场景：修改数据不会二次更新
+
+updated
+
+组件因为响应式状态改变而更新dom树之后调用
+
+使用场景：使用较少，一般是组件更新完后做缓存操作（缓存组件信息）、监控组件更新完成
+
+> 和nextTick区别：
+>
+> updated会在组件的任意 DOM 更新后被调用，这些更新可能是由不同的状态变更导致的，因为多个状态变更可以在同一个渲染周期中批量执行（考虑到性能因素）。如果你需要在某个特定的状态更改后访问更新后的 DOM，可以使用 [nextTick()](https://cn.vuejs.org/api/general.html#nexttick) 作为替代。
+>
+
+beforeUnmount/beforeDestroy
+
+在组件实例被卸载之前调用
+
+unmounted/destroyed
+
+在组件实例被卸载之后调用，
+
+使用场景：一般用于清理一些副作用，取消全局事件绑定，销毁定时器等，防止内存泄露
+
+activated
+
+仅针对 KeepAlive 包裹的组件。注册一个回调函数，当组件被插入到 DOM 中时调用。
+
+deactivated
+
+仅针对 KeepAlive 包裹的组件。注册一个回调函数，当组件从 DOM 中被移除时调用
+
+### 生命周期钩子
+
+setup组合式api入口钩子，替代onBeforeCreate和onCreated
+
+onBeforeMount
+
+onMounted
+
+onBeforeUpdate
+
+onUpdated
+
+onBeforeUnmount
+
+onUnmounted
+
+onActivated
+
+onDeactivated
+
+参考
+
+https://juejin.cn/post/7352075662453702694?searchId=20241007140835FDE0F7079CF74DC84961
+
+### vue3与vue2生命周期对比
+
+1.vue3生命周期将beforDestroy和destroy更改为beforeUnMount和unMounted
+
+2..vue3提供生命周期钩子，都是在生命周期前加on。vue3提供setup组合式API钩子作为组合式api入口，生命周期钩子可以在其中使用。注意setup API本身就代替了onBeforeCreate和onCreated钩子，所以没有这两个钩子。
+
+3.vue3新提供了2个dev调试钩子，1个SSR钩子
+
+![image-20241011173014494](/Users/dnhy/Library/Application Support/typora-user-images/image-20241011173014494.png)
+
+### 在哪个生命周期发请求
+
+生命周期都是同步执行的，任何钩子都可以，但一般是在created和mounted，vue3组合式api只能在onMounted钩子中发生请求。
+
+## v-model
+
+v-model是一个语法糖，可以为表单组件（能修改的视图）做数据的双向绑定
+
+**对于组件可以解析成一个value属性和一个input自定义事件**，组件内部需要在model选项中自定义对应的prop和event进行接收，并且可以在定义时给属性和事件修改名称。
+
+**对于原生组件使用v-model，会解析出不同的属性和事件**，如input组件会生成value属性+input自定义事件，复选框生成checked+change。并且每种表单都有额外的处理逻辑，比如input会处理中文的输入问题。
+
+### vue3新特性
+
+对于组件：
+
+1.Vue3使用v-model:name的方式可以对modelValue进行改名
+
+用于自定义组件时，`v-model` prop 和事件默认名称已更改：
+
+- prop：`value` -> `modelValue`；
+- 事件：`input` -> `update:modelValue`；
+
+2.Vue3支持多个数据双向绑定，使用v-model:a，v-model:b，Vue2不支持
+
+3.Vue3自定义组件可以使用defineModel的返回值model代替modelValue的prop和update:modelValue自定义事件，model是一个ref
+
+- 它的 `.value` 和父组件的 `v-model` 的值同步；
+- 当它被子组件变更了，会触发父组件绑定的值一起更新
+
+### .sync修饰符
+
+实现vue2双向绑定多个数据（多个数据同步），解析成value+update:value
+
+Vue3该语法被移除
+
+## SPA
+
+### SPA与MPA对比
+
+**spa**：单页面应用，由一个主页面和多个单页面片段组成，采用局部刷新，页面切换快。
+
+默认只有一个html页面，并提供一个挂载点，最终打包后会在此页面中引入对应的js资源。切换页面时通过监听路由变化，渲染对应的页面。属于客户端渲染CSR：浏览器请求获取html、js之后还需要解析获取虚拟dom，转换成真实dom。
+
+seo优化难实现，首屏加载较慢：原因是浏览器请求返回的html里只有一个app节点，没有任何内容，无法seo优化。然后再请求js，浏览器解析后生成真实dom，这样白屏时间较长。
+
+**mpa**：多页应用，由多个html页面组成，采用整页刷新，页面切换速度较慢。
+
+属于服务端渲染SSR：服务端返回完整的html，数据既可以在客户端发送ajax请求获取，也可以在后端获取之后由服务端一并返回（服务端压力较大）。
+
+|     | 单页面应用（SPA） | 多页面应用（MPA） |
+| --- | --- | --- |
+| 组成 | 一个主页面和多个页面片段 | 多个主页面 |
+| 刷新方式 | 局部刷新 | 整页刷新 |
+| url模式 | 哈希模式 | 历史模式 |
+| SEO搜索引擎优化 | 难实现，可使用SSR方式改善 | 容易实现 |
+| 数据传递 | 容易 | 通过url、cookie、localStorage等传递 |
+| 页面切换 | 速度快，用户体验良好 | 切换加载资源，速度慢，用户体验差 |
+| 维护成本 | 相对容易 | 相对复杂 |
+
+### 解决首屏加载速度慢
+
+原因：
+
+1.网络延时
+
+2.资源文件过大
+
+3.资源重复发送请求加载
+
+4.加载脚本时渲染内容堵塞
+
+解决：
+
+1.减小入口文件体积：路由懒加载
+
+2.静态资源本地缓存
+
+前端：使用localstorage
+
+后端：
+
+- 采用`HTTP`缓存，设置`Cache-Control`，`Last-Modified`，`Etag`等响应头
+- 采用`Service Worker`离线缓存
+
+3.UI框架按需加载
+
+4.组件重复打包
+
+进行代码拆分:
+
+假设`A.js`文件是一个常用的库，现在有多个路由使用了`A.js`文件，这就造成了重复下载
+
+解决方案：在`webpack`的`config`文件中，修改`CommonsChunkPlugin`的配置
+
+```
+minChunks: 3
+```
+
+`minChunks`为3表示会把使用3次及以上的包抽离出来，放进公共依赖文件，避免了重复加载组件
+
+5.压缩图片
+
+对于所有的图片资源，我们可以进行适当的压缩
+
+对页面上使用到的`icon`，可以使用在线字体图标，或者雪碧图，将众多小图标合并到同一张图上，用以减轻`http`请求压力。
+
+6.开启Gzip压缩
+
+使用compression-webpack-plugin插件，配置webpack
+
+```js
+const CompressionPlugin = require('compression-webpack-plugin')
+
+configureWebpack: (config) => {
+        if (process.env.NODE_ENV === 'production') {
+            // 为生产环境修改配置...
+            config.mode = 'production'
+            return {
+                plugins: [new CompressionPlugin({
+                    test: /\.js$|\.html$|\.css/, //匹配文件名
+                    threshold: 10240, //对超过10k的数据进行压缩
+                    deleteOriginalAssets: false //是否删除原文件
+                })]
+            }
+        }
+```
+
+在服务器我们也要做相应的配置 如果发送请求的浏览器支持`gzip`，就发送给它`gzip`格式的文件 我的服务器是用`express`框架搭建的 只要安装一下`compression`就能使用
+
+```js
+const compression = require('compression')
+app.use(compression())  // 在其他中间件使用之前调用
+```
+
+7.使用SSR
+
+SSR（Server side ），也就是服务端渲染，组件或页面通过服务器生成html字符串，再发送到浏览器
+
+首屏采用服务端渲染的方式，后续采用CSR
+
+8.懒加载
+
+![img](https://camo.githubusercontent.com/d42d23b92628c721abfde9dbdf81c4515b0f01940fe522b02c546b9bbde07b23/68747470733a2f2f7374617469632e7675652d6a732e636f6d2f34666166653930302d336163632d313165622d383566362d3666616337376330633962332e706e67)
+
+### 面试题回答整理
+
+1.使用路由懒加载（加载首页时只需要加载首页的路由）、异步组件（使用按需加载），其中、异步组件可以实现组件拆分异步加载，并配合使用webpack分包减少入口文件体积大小
+
+2.骨架屏优化体验
+
+3.抽出公共代码，splitChunks进行代码分割
+
+4.静态资源（其中的打包好的js、css、html）缓存，采用http缓存、使用localstorage实现缓存资源
+
+5.图片资源的压缩，雪碧图、对小图片进行base64减少http请求
+
+6.打包开启gzip压缩处理，使用compression-webpack-plugin插件
+
+7.静态资源使用CDN提速（终极手段，就近访问）
+
+8.SSR服务端渲染（直接得到渲染好的html，不需要请求html后再请求js再对js解析）
+
+## v-show与v-if
+
+共同点：
+
+- 当表达式为`true`的时候，都会占据页面的位置
+- 当表达式都为`false`时，都不会占据页面位置
+
+不同点：
+
+控制手段：v-show隐藏是设置元素样式display:none使元素在页面上**不渲染**，不会占据位置，但dom元素还在。v-if隐藏是**直接删除dom元素**
+
+编译过程：`v-if`切换有一个局部编译/卸载的过程，切换过程中合适地销毁和重建内部的事件监听和子组件，会触发组件的生命周期；`v-show`只是简单的基于css切换，不会触发组件生命周期。
+
+性能消耗：`v-if`有更高的切换消耗；`v-show`有更高的初始渲染消耗；’
+
+v-if比v-show优先级高
+
+如何选择
+
+v-if可以阻断内部代码执行，false不会执行内部逻辑
+
+页面在第一次加载时确认后续不会频繁切换更改采用v-if，频繁切换改用v-show
+
+## v-for与v-if
+
+vue2v-for比v-if优先级高，vue3相反
+
+1.vue2同时定义在一个元素上比较浪费性能且会发生报错，如果必须放在一个元素上（按条件渲染列表元素）可以提前通过计算属性对数组进行过滤代替v-if
+
+2.vue3中v-if优先级较高，可以同时定义在一个元素上
+
+但是如果按条件渲染列表元素会导致v-if无法访问到v-for中的item变量名，会发生报错
+
+```html
+<!-- 
+ 这会抛出一个错误，因为属性 todo 此时
+ 没有在该实例上定义
+-->
+<li v-for="todo in todos" v-if="!todo.isComplete">
+  {{ todo.name }}
+</li>
+```
+
+解决：
+
+可以类似vue2对数组过滤，或者在外先包装一层 `<template>` 再在其上使用 `v-for` 可以解决这个问题 (这也更加明显易读)：
+
+template
+
+```html
+<template v-for="todo in todos">
+  <li v-if="!todo.isComplete">
+    {{ todo.name }}
+  </li>
+</template>
+```
+
+## Vue.set/vm.$set实现
+
+1.开发环境下、target未定义或者是原始类型则报错
+
+2.如果是数组Vue.set(array,1,100)，会调用我们重写的splice方法（重写的方法可以更新视图）
+
+所以说一般情况下更新数组可以直接用重写的方法即可
+
+3.如果该属性就是对象本身的属性，则直接修改即可
+
+4.如果是Vue实例或根数据data时，报错（更新data无意义）
+
+5.如果不是响应式的对象，直接添加属性
+
+6.如果是其他情况（即响应式对象中添加新属性），直接使用defineReactive将其定义成响应式的
+
+7.通知视图更新
+
+新增属性时，可以考虑使用对象合并的方式（扩展运算符或者Object.assign都行），重新对对象赋值可以进行重新劫持
+
+```js
+this.obj = { ...this.obj, ...{ b: 111111 } }
+```
+
+源码：
+
+https://github1s.com/vuejs/vue/blob/main/src/core/observer/index.ts
+
+## computed和watch
+
+**computed**具备缓存功能，第一次取值的时候才执行对应的方法，依赖不发生改变，后续取值不会重新执行对应的方法，不支持异步逻辑
+
+**watch**监控值的变化，当值发生变化调用回调函数。
+
+异步要注意竞态问题（竞争条件）：
+
+watchvue3提供了cleanup清理函数，可用于屏蔽上一次的结果（修改上一次回调函数中的变量值）
+
+![image-20241010112826804](/Users/dnhy/Library/Application Support/typora-user-images/image-20241010112826804.png)
+
+watch原理:
+
+1.获取数据源和cb回调函数：watch传入一个source和cb函数，source可以是响应式数据或一个getter函数（getter函数每次调用返回一个数据源新值），如果是响应式对象，也会将其转化为一个getter函数，返回source.value作为数据源
+
+2.**新建一个effect**并将getter函数传入构造函数，如果调用effect.run方法，将会调用getter函数，返回数据源最新的值。新建一个job函数赋值给effect.scheduler，job函数中有efftct.run方法的调用、cb回调函数的调用。将这个effect放到全局。
+
+3.初始化watch时运行一次efftct.run方法，其中调用了getter函数获取oldValue，获取响应式数据的值会触发其get方法，get中触发track方法，track将响应式对象和全局的这个effect关联到一个Map中（这个map的结构是：target->放多个effect的Map）。这个过程就是effect对这个getter方法返回的数据源中的响应式对象进行了**依赖收集**。
+
+4.当响应式数据发生变化时，会触发响应式数据的set方法，set方法调用trigger方法，trigger方法会从Map中获取响应式数据对应的effect Map，遍历执行所有effect的effect.trigger函数。调用effect.trigger函数，trigger函数调用effect.scheduler即job。job函数会调用efftct.run方法获取newValue，调用cb函数，并将newValue和之前的oldValue一起赋值给cb函数
+
+## ref和reactive区别
+
+reactive处理代理对象，通过代理对象进行数据劫持，底层是new Proxy()
+
+ref处理原始类型，会将原始数据类型包装成对象，然后采用的是Object.defineProperty()对这个对象进行数据劫持
+
+ref如果包对象，底层采用reactive处理对象
+
+reactive对象包ref，如果reactive对象不是数组，则底层会自动对ref进行解包操作（自动ref.value）
+
+## watch和watchEffect区别
+
+## template 到 render 的过程(编译时模板编译过程)
+
+1.template转成**ast语法树**（抽象语法树：用来描述html），通过 parseHTML进行逐词翻译
+
+2.**静态优化**ast语法树：对静态语法做静态标记 - mark diff来做优化 静态节点会跳过diff操作
+
+3.将ast语法树转成render函数:遍历语法树通过字符串拼接重新**生成代码**（h函数调用代码），构造一个render函数返回生成的代码（这些代码是h函数的调用，调用结果是返回虚拟dom，所以相当于render函数返回了虚拟dom）
+
+template->ast tree->render function
+
+[vue2源码](https://github1s.com/vuejs/vue/blob/main/src/platforms/web/runtime-with-compiler.ts)
+
+该编译过程比较消耗性能，一般编译过程是在构建工具中进行。vue完整版带的编译器也可以编译，但不推荐在运行时使用（注意：vue编译器不是构建工具，只能在运行时使用）。
+
+## new Vue的过程
+
+组件初始化+模板编译逻辑+模板渲染逻辑+响应式更新逻辑+生命周期调用
+
+1、init events进行事件的初始化，init lifecycle初始化组件的父子关系$parent、$children\$root
+
+调用beforeCreate钩子
+
+2、init Injections、init Provide处理inject和provide。intState初始化响应式数据（reactivity），响应式数据包括：data(对象数据劫持、数组方法重写)、computed、props、watch、method
+
+调用created钩子
+
+3、判断用户是否传递**el属性**，如果传递了vm就调用$mount方法进行挂载，如果没传递需要用户自己手动调用vm.$mount进行挂载；开始挂载时判断用户是否传入**template选项**，如果传入就编译template为render函数（三部曲过程见模板编译过程），未传入就使用el的外部的html（即div id=app中的内容）作为模板。
+
+调用beforeMount钩子
+
+4、调用render函数，将返回的VDOM渲染成真实dom放到页面的挂载节点上（通过 vm._update中先执行 vm.\_\_patch\_\_ 去把 VNode 转换成真正的 DOM 节点，再挂载到vm.$el上）。创建一个watcher，将以上渲染逻辑（封装成updateComponent）传入watcher，并对响应式数据添加dep属性进行依赖收集记住对应的这个watcher。
+
+调用mounted钩子
+
+5、后续数据变化触发视图更新，进行重新挂载时调用数据对应的watcher，即再次调用updateComponent（此时使用diff算法比较虚拟dom，找到差异点进行更新），
+
+更新前会触发beforUpdate钩子，更新后触发updated钩子。这两个钩子都是传入了watcher，由watcher进行调用。
+
+6、用户调用vm.$destroy时，会移除父组件下的当前子组件，移除该组件的响应式数据、事件。
+
+销毁前调用beforeDestroy钩子，销毁后调用destroyed钩子。
+
+[Vue2源码](https://github1s.com/vuejs/vue/blob/main/src/core/instance/index.ts)
+
+![](https://v2.cn.vuejs.org/images/lifecycle.png)
+
+## diff算法
+
+虚拟dom可以看做描述真实dom的蓝图
+
+一开始渲染，是根据虚拟dom创建了一套真实dom，然后将真实dom挂载到节点。
+
+更新时再次调用render函数拿到了一套新的虚拟dom，我们不是直接根据这套新的虚拟dom去创建一套新的真实dom，而是尽可能去比较复用已经有的老的真实dom的节点，去调整位置，没有需要的节点的时候再创建新的真实dom节点，删除已有的不再需要的dom节点。
+
+算法过程：
+
+1.diff算法是比较两个虚拟树的差异，采用深度优先、同级比较的方式。
+
+2.对两个节点的tag和key进行比较（调用sameVnode比较）：如果两个节点不相同，真实dom上就删除老节点，创建新的dom节点；如果是相同节点，比较两个节点的差异，包括属性和事件等。
+
+3.比较完当前节点之后，如果两个节点相同，再去比较子节点（patchVnode）。
+
+- 新节点是否是文本节点，如果是，则直接更新`dom`的文本内容为新节点的文本内容
+  如果新节点不是文本节点：
+
+- 新的有子节点，老的没有子节点，创建新的dom节点添加进父节点
+
+- 新的没有子节点，老的有子节点，把不需要的老的dom节点删除
+
+- 两方都有子节点且不完全相同（调用updateChildren处理子节点）：
+
+​		1.vue2采用优化策略：进行头头，尾尾，头尾，尾头比较，比较一致后对真实dom进行移动调		整。
+
+​		乱序时将老的创建为一个映射表，新的在这个映射表里找看看现有真实dom节点是否可以复		用，可以复用也进行移动即可，少的新增，多的删除。
+
+​		每次复用移动之前先使用patchVnode递归比较这两个新旧虚拟节点的子节点。
+
+​		2.vue3采用最长递增子序列进一步优化
+
+[Vue2源码](https://github1s.com/vuejs/vue/blob/main/src/core/vdom/patch.ts#L533)
+
+[源码解读](https://github.com/febobo/web-interview/issues/24)
+
+## key的作用
+
+diff算法对比新旧vnode，会尽可能就地修改/复用相同类型的元素，但是这种算法可能会导致一些问题，需要使用key去决定到底是修改还是复用元素，还是直接创建新元素。
+
+比如两个input切换时，仅仅是type属性不同，如果不使用key，切换时会将原来的input dom元素直接修改type属性，而value值相同。使用了key可以销毁原来的input，生成一个新的input。
+
+不传key默认key是undefined
+
+key作用：
+
+1.diff算法中通过key判断两个节点是否是相同节点，如果是相同节点，则进行复用（samevnode方法中使用key和tag对比新旧vnode）
+
+2.进行预期的dom更新：如渲染列表时，vue会采用就地更新的策略，如中间插入元素时，会更改每个元素的值，并在末尾新建一个元素后插入，有key时diff算法会复用已有元素，直接可以插入元素后移动列表原有的元素。
+
+![image-20241012103413474](/Users/dnhy/Library/Application Support/typora-user-images/image-20241012103413474.png)
+
+3.注意尽量不要使用index作为key
+
+位置1插入一个元素导致列表index重新编号，此时新旧的node都会被认为对应是相同的元素（key和tag相同），1-4会直接进行修改操作然后新建一个index=5的e元素插入），而不是预期的节点复用
+
+index ：0         1        2  3  4
+
+div:   	a          b       c  d  e
+
+index：0 1(新元素)    2  3  4  5（新建一个e元素插入）
+
+div:	   a          f        b  c  d  e
+
+## Vue.use的作用（了解）
+
+### 作用
+
+安装Vue.js插件。插件如果是对象，必须提供install方法，如果是函数，会被作为install方法。vue.use会调用install方法，传入Vue以及vue.use的其他参数。
+
+> 插件依赖vue
+>
+> 依赖vue指的是插件中通过import将vue引入
+>
+> 如果是通过其他方式传入的vue则不能说插件依赖vue，这样可以保证组件和外部的vue版本一致
+
+### 插件的功能
+
+1.添加全局组件、全局过滤器、全局组件
+
+2.通过全局混入来添加一些组件选项
+
+3.添加Vue实例方法，添加到Vue.prototype
+
+### 应用
+
+VueRouter插件、Vuex插件
+
+## Vue2中vm和vc的区别、Vue.extend作用
+
+### vm和vc的区别
+
+vm是Vue的实例
+
+vc是VueComponent，是Vue.extend产生的，是Vue的子类
+
+### Vue.extend作用
+
+每个组件创建的时候都会调用该方法。
+
+Vue.extend(options)创建了VueComponent构造函数，赋值给Sub，并实现了Sub对Vue的继承。另外Sub上也添加了Vue的extend、mixin、use方法运行进一步扩展使用。Vue.extend最终返回了子类Sub。
+
+用户调用Vue.extend(options)获取Sub构造函数后，new Sub()相当于new Vue(options)，构造函数会调用父类的Vue._init(options)进行实例的初始化和挂载。
+
+### 应用
+
+Vue.extend创建一个组件子类之后，可以手动将这个组件挂载到指定的节点上
+
+### 补充
+
+Vue.component内部也是Vue.extend，第一个参数会自动使用给定的 `id` 设置组件的名称。第二个参数definition如果是对象，会返回一个组件构造函数。
+
+> vue3可以使用render函数挂载组件到节点上
+
+## data为什么必须是一个返回对象的函数
+
+1.根实例对象（vm）的data既可以是对象也可以是函数
+
+2.组件实例对象的data必须是函数
+
+如果是对象，会导致不同组价数据共享，因为options(内部存在data对象)是挂在组件构造函数Sub上的（类似类的静态属性），不同实例的data会共享这个对象
+
+```js
+Sub.options=options
+```
+
+![image-20241012120810844](/Users/dnhy/Library/Application Support/typora-user-images/image-20241012120810844.png)
+
+如果写成方法，每次调用Sub构造函数创建实例都会重新调用这个data方法，每次都返回不同的对象赋值给当前实例的data属性，所以不同实例取data时就不会共享同一个对象
+
+![image-20241012120749624](/Users/dnhy/Library/Application Support/typora-user-images/image-20241012120749624.png)
+
+> Vue3使用CreateApp创建一个组件，组件中的data都会是一个函数
+
+## v-once和v-memo
+
+v-once只渲染元素和组件一次，之后重新渲染，元素/组件及其子节点将被视为静态内容并跳过。
+
+渲染一次后将生成的dom存入缓存，之后只调用缓存
+
+vue3中的v-memo通过依赖列表的方式控制页面渲染，依赖列表中的数据不变化，元素/组件及其子节点不发送重新渲染。依赖变化重新进行渲染。
+
+内部实现类似watch，依赖变化后调用回调函数重新生成dom，不变化每次渲染都使用缓存dom节点。
+
+## mixin
+
+局部混入，全局混入。全局混入一般用于编写插件，局部混入用于复用逻辑。
+
+![image-20241012194315938](/Users/dnhy/Library/Application Support/typora-user-images/image-20241012194315938.png)
+
+## slot
+
+子组件使用slot可以进行占位，作用是定制化组件模板，父组件可以向子组件传入需要的内容。
+
+默认插槽，插槽name为default
+
+具名插槽，父组件放入插槽的内容已编译完成，子组件的插槽直接找父组件的对应name插槽，用来直接替换。
+
+作用域插槽，父组件将还未完成编译的之后需要放入插槽的内容放入函数中，传入一个参数才会执行。子组件的插槽找到父组件对应name的插槽函数，传入需要的参数，函数返回用这个参数编译完成的内容，替换子组件的插槽位置。
+
+总结：普通插槽，实际dom渲染在父级。作用域插槽（拿到父级函数后）实际dom在子组件内部渲染
+
+注意插槽渲染指的是子组件的slot被替换为实际的dom
+
+应用：
+
+弹框组件、布局组件、表格组件、树组件、列表组件（自定义列表元素内容，子组件请求获取列表数据后通过slot的属性回传给父组件，父组件通过template的v-slot命令拿到数据后渲染出所有列表元素替换子组件中的slot）
+
+## 递归组件(了解)
+
+### 模板递归
+
+组件需要写name选项
+
+### jsx+render函数递归
+
+较为直观
+
+## 组件name选项作用(了解)
+
+1.每个组件创建的时候都会调用Vue.extend方法，如果选项中有name属性，组件会把自己的构造函数（Sub）放到components数组中（将自己注册到组件中），组件便可以拿到自身进行递归调用。
+
+```js
+if (name) {
+	Sub.options.components[name] = Sub
+}
+```
+
+2.dev-tools方便查找和调试
+
+3.keep-alive进行缓存配置（include、exclude）
+
+4.方便注册组件
+
+5.可以查找子组件
+
+```js
+$children.filter(item=>item.$options.name==='xxx')
+```
+
+## 修饰符
+
+简化逻辑，会编译成具体逻辑
+
+1.表单修饰符：lazy、trim、number，限制表单输入
+
+2.事件修饰符：stop、prevent、self、once、capture（事件捕获）、passive（滚动优化）、native（为组件绑定原生事件，vue3移除，默认将原生事件绑定到根元素上）
+
+3.鼠标修饰符：left、right、middle
+
+4.按钮修饰符 对keyCode处理
+
+5.vue2.sync修饰符(vue3移除)
+
+## 异步组件
+
+### 概念
+
+以一个工厂函数定义组件，异步调用函数解析组件定义
+
+推荐异步组件和webpack的code-splitting配合使用，对异步组件进行分包
+
+一般用于大组件的拆分（1.拆分出加载时间较长的组件，先加载整体页面，再加载局部的大组件，以此避免页面白屏加载时间过长2.当配合webpack分包时入口文件体积更小，加载会更快）、路由加载组件实现懒加载
+
+### 用法
+
+1.回调写法
+
+2.promise写法
+
+3.对象写法
+
+### 原理
+
+1.默认先同步渲染异步占位符节点
+
+2.异步组件渲染完毕后调用$forceUpdate强制更新，渲染加载完毕后的组件到页面上
+
+## nextTick
+
+### 概念
+
+1.Vue中更新视图是异步的（如果同步更新，用户多次更新数据都会多次驱动视图更新性能较差，异步更新可以保证多次更新视图最后只更新一次），异步更新的底层逻辑就是nextTick。
+
+2.nextTick的回调函数可以获取更新后的DOM
+
+3.多次调用nextTick会被合并（vue自己调用的nextTick会和用户定义的合并）
+
+### 原理
+
+vue2原理：
+
+同一组件多次更新数据只会有一个watcher被加入queueWatcher队列，队列中不同组件的多个watcher执行最终也只会掉用一次nextTick，所以页面刷新只会调用一次nextTick。
+
+用户可以多次调用nextTick，调用时会传入自定义回调。刷新页面的时候nextTick也会执行一次放入执行刷新页面的flash方法。执行刷新页面的flash方法和用户传入nextTick的自定义回调会合并到一个callback数组中。
+
+虽然综上所述多次执行了nextTick，但最终nextTick内部也只会执行一次timeFunc方法（pending标识符控制），timeFunc执行的时候会异步依次执行callback数组中的方法，异步的手段会根据浏览器降级兼容。
+
+所以概括就是批处理：
+
+1.调用nextTick
+
+2.依次放入用户回调，flash刷新方法到callback数组
+
+3.异步按顺序调用callback数组中的方法（更新视图、用户获取dom）
+
+vue3原理：
+
+把传入的方法变成异步的
+
+### 扩展
+
+event loop宏任务、微任务
+
+## keep-alive
+
+概念：
+
+vue的内置组件，能在组件切换过程中缓存组件的实例,组件不会销毁。组件重新激活时通过缓存的实例拿到之前渲染好的DOM进行复用，无需重新生成节点。
+
+属性：
+
+include、exclude、max(使用)
+
+LRU缓存淘汰算法：
+
+`keep-alive`的`max`属性，用于限制可以缓存多少组件实例，一旦这个数字达到了上限，在新实例被创建之前，已缓存组件中最久没有被访问的实例会被销毁掉
+
+应用：
+
+![image-20241013121908780](/Users/dnhy/Library/Application Support/typora-user-images/image-20241013121908780.png)
+
+问题解决：
+
+![image-20241013123718598](/Users/dnhy/Library/Application Support/typora-user-images/image-20241013123718598.png)
+
+## 自定义指令
+
+指令的目的在于复用操作dom的逻辑
+
+### 常见指令编写
+
+待补充
+
+## vue设计模式
+
+- 单例模式
+
+  整个程序只有一个Vuex的store实例，分配给每个组件使用
+
+- 工厂模式
+
+  传入参数即可创建实例，createElement创建vnode
+
+- 发布订阅模式（手动绑定，手动触发）
+
+  事件绑定事件触发
+
+  eventbus、provideinject
+
+- 观察者模式（观察，自动触发）
+
+  watcher&dep的关系
+
+- 代理模式
+
+  访问vm.a访问vm._data.a
+
+## vue中的性能优化
+
+- 数据层级不要过深，合理设置响应式数据
+- 数据必须放data中，但不需要是响应式，使用Object.freeze
+- 使用数据先取值将结果缓存，使用缓存操作后再赋值回去，不频繁取值触发getter
+- 合理设置key属性，不要将index设置为key，希望元素更新可以设置key
+- v-show和v-if的选取，v-if首次加载控制是否显示，v-show用于频繁切换
+- 控制组件粒度，vue采用组件范围更新
+- 采用函数式组件，vue2有大量渲染组件可用，vue3一般不用
+- 采用异步组件，借助webpack分包的能力
+- 采用keep-alive、v-once、v-memo缓存粗剪
+- 数据过多分页，移动端虚拟滚动、时间分片渲染等策略
+
+## vue项目解决跨域
+
+跨域是浏览器同源策略导致的，是浏览器的默认行为（协议、主机名、端口不同）
+
+注意服务端和服务端之间通信不会跨域
+
+解决：
+
+- CORS（Cross-origin Resource Sharing跨域资源共享）由服务端设置，允许指定的客户端访问服务器
+- 构建工具设置反向代理（开发时webpack设置dev-proxy），使用Nginx设置反向代理（上线时）
+- 使用WebSocket进行通信（部分接口去除跨域）
+- 搭建BBF（Backend For Frontend）层解决跨域（前端访问BBF,BBF访问后端）
+
+## vue项目封装axios
+
+![image-20241014103807694](/Users/dnhy/Library/Application Support/typora-user-images/image-20241014103807694.png)
+
+具体代码见ggzx
+
+## vue项目权限管理
+
+![image-20241015103500249](/Users/dnhy/Library/Application Support/typora-user-images/image-20241015103500249.png)
+
+## vue3使用CompositionAPI优势
+
+- vue2的OptionsAPI，用户提供的data、props、methods、computed、watch等属性，在复杂的逻辑会出现反复横跳的问题，组合式api可以把复杂逻辑更加聚合
+- vue2中所有属性都是通过this访问，this有指向问题。组合式api没有this问题
+- vue2很多未使用的方法或属性依旧会被打包，且所有全局API都在vue对象上公开。组合式api需要使用到某个钩子时才会手动引入，且引入之后会另外进行tree-shaking，使用到的才会打包。
+- 组件逻辑共享问题，vue使用mixins实现组件之间的逻辑共享，但是会有数据来源不明确，命名冲突等问题。组合式api提取公共逻辑非常方便。
+
+## vue3与vue2的区别
+
+- vue3注重模块上的拆分，在vue2无法单独使用部分模块，需要引入完整的vuejs（例如只想使用响应式部分，但需要引入完整的vuejs）。vue3中的模块耦合度低，模块可以独立使用。
+- vue2很多未使用的方法或属性依旧会被打包，且所有全局API都在vue对象上公开。vu3需要使用到某个钩子时才会手动引入，且引入之后会另外进行tree-shaking，使用到的才会打包。
+- vue3允许自定义渲染器，扩展能力强。不会像vue2一样改写源码改造渲染方式，扩展更方便。
+- vue2使用defineProperty进行数据劫持，需要对属性重写添加getter和setter，性能较差。当新增属性和删除属性时无法监控变化，需要通过$set和$delete实现。数组不采用defineProperty劫持（对索引劫持会造成性能浪费）需要对数组单独处理。vue3所有数据都采用proxy代理，性能得到提升
+- Diff算法vue3进行了重写，进一步进行了优化
+- vue3模板编译优化，采用PatchFlags优化动态节点，采用BlockTree进行靶向更新
+
+## vue项目中的错误如何处理
+
+1.errorCaptured钩子
+
+组件捕获后代的错误，并向父组件上报，如果某一层组件的errorCaptured返回false会停止传播，最终传播到全局的config.errorHandler(需要被定义)
+
+2.全局设置错误处理
+
+如果组件渲染时出现运行错误，错误会被传递至全局的Vue.config.errorHandler配置函数
+
+```js
+app.config.errorHandler = (err, instance, info) => {
+  // 处理错误，例如：报告给一个服务
+}
+```
+
+3.接口异常处理
+
+![image-20241015135337543](/Users/dnhy/Library/Application Support/typora-user-images/image-20241015135337543.png)
+
+[Sentry前端监控](https://juejin.cn/post/7211401380769513531)
+
+## vue3模板编译优化（了解）
+
+待补充
+
+## Vue3新特性
+
+![image-20241015144157573](/Users/dnhy/Library/Application Support/typora-user-images/image-20241015144157573.png)
+
+## vue-router路由守卫钩子
+
+1. 导航被触发。
+2. 在失活的组件里调用 `beforeRouteLeave` 守卫。
+3. 调用全局的 `beforeEach` 守卫。
+4. 在重用的组件里调用 `beforeRouteUpdate` 守卫(2.2+)。
+5. 在路由配置里调用 `beforeEnter`。
+6. 解析异步路由组件。
+7. 在被激活的组件里调用 `beforeRouteEnter`。
+8. 调用全局的 `beforeResolve` 守卫(2.5+)。
+9. 导航被确认。
+10. 调用全局的 `afterEach` 钩子。
+11. 触发 DOM 更新。
+12. 你用 `beforeRouteEnter` 守卫中传给 `next` 的回调函数，创建好的组件实例会作为回调函数的参数传入。
+
+## vue-router的模式
+
+### hash、history、abstract
+
+- hash模式：前端锚点、兼容性好（高版本popstate、低版本hashchange）但不够美观。另外服务端无法获取前端锚点导致无法根据hash值渲染页面，不利于seo优化
+
+​		原理：页面切换通过location.hash修改hash值，通过popstate/hashchange监控hash值的变化，变化时调用回调函数修改dom
+
+- history模式：history.pushState api+popState事件美观。支持seo优化。
+
+  原理：调用history.pushState切换路径，并重新渲染dom。监听popstate事件，当浏览器前进后退时触发回调函数渲染dom。
+
+  > popState事件：可以监听hash值变化、浏览器前进后退（前进后退按钮、调用history的back、go、forward方法）。不会监听pushState和replaceState方法、a标签跳转。只能在同一页面上使用，不是同一页面无法监听。
+  >
+  > pushState、replaceState方法控制浏览器历史记录，修改当前url且不会刷新页面。必须使用http协议访问页面。
+
+可以借助history模式实现hash模式，vue-router4就是使用history模式实现了两种模式，注意实现hash模式后特性就是hash模式的了，不再继承原来history的特性。vue-router3是分开实现的。
+
+### hash和history切换和刷新的不同机制
+
+hash切换或刷新页面是在当前页面上找锚点，不会向服务器发请求
+
+history切换页面本身需要时向服务器发送请求整体页面，但vue-router利用pushState api+popState实现了无需 通过刷新来重新加载页面（不发送页面请求），而是在已经加载的单页面上解析js修改url的pathname、渲染dom。
+
+但是history模式下页面刷新还是会发送请求出现404（使用了已经修改的url访问服务器，找不到资源），开发时可以使用wbpack history-fallback插件解决，部署到服务器需要使用nginx解决
+
+> 对于vue-router，使用router-link相当于实现了上面所述的url跳转无需重新加载页面这样的a标签,即底层使用了**history.pushState**的a标签，而如果单独使用a标签会发生重新加载，底层使用了**location.href**。编程导航router.push底层也是使用了history.pushState。
+>
+> router-link和编程导航router.push还可以触发路由守卫钩子。
+
+## Vue部署到服务器404解决
+
+404原因：采用了history模式，刷新时服务端没有对应的资源。
+
+解决方法：配置服务端当访问某个页面不存在时让服务端返回首页，解析引用的js根据路径找到对应的组件渲染。
+
+[配置方法](https://router.vuejs.org/zh/guide/essentials/history-mode.html)
+
+## vuex
+
+### vuex刷新数据丢失解决
+
+- 判断vuex中数据存不存在，不存在重新发送请求获取
+
+- 使用持久化插件vuex-persistedstate，将数据存到缓存中
+
+### mutation和action的区别
+
+- 在action中处理异步逻辑，获取数据后将结果提交给mutation，mutation中修改state，mutation必须是同步的
+- action中可以多次commit操作，action中也可以调用action
+- 在非mutation中修改数据，严格模式下会发生异常
+- dispatch会将action包装成promise，mutation没进行包装
+
+## vuex的module
+
+项目庞大，对状态进行划分

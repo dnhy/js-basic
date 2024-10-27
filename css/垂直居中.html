@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="parent">
+      <div class="box">ceshi1</div>
+    </div>
+    <style>
+      #parent {
+        background-color: aqua;
+        text-align: center;
+        height: 200px;
+        position: relative;
+      }
+      .box {
+        width: 50%;
+        line-height: 80px;
+        font-size: 50px;
+        background-color: blue;
+        color: #fff;
+        /* 仅水平居中 */
+        /* margin: 0 auto; */
+        /* 水平垂直居中，可以用父相子绝单独实现水平或垂直居中 */
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        /*定宽高时等同于margin-left:负自身宽度一半;margin-top:负自身高度一半;*/
+        transform: translate(-50%, -50%);
+      }
+    </style>
+  </body>
+</html>

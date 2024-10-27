@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="left">左侧</div>
+      <div class="middle">中间</div>
+      <div class="right">右侧</div>
+    </div>
+  </body>
+  <style>
+    @import './common.css';
+  </style>
+  <style>
+    /* 使用flex布局 */
+    .wrap {
+      background-color: grey;
+      display: flex;
+    }
+    .left {
+      width: 200px;
+      height: 200px;
+      background-color: aqua;
+    }
+    .right {
+      width: 200px;
+      height: 200px;
+      background-color: blue;
+    }
+    .middle {
+      flex: 1;
+      height: 200px;
+      background-color: rgb(255, 74, 74);
+    }
+  </style>
+  <!-- <style>
+    /* 两边使用定位，中间使用margin */
+    .wrap {
+      position: relative;
+      background-color: grey;
+    }
+
+    .left {
+      width: 200px;
+      height: 200px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: aqua;
+    }
+    .right {
+      width: 200px;
+      position: absolute;
+      height: 200px;
+      top: 0;
+      right: 0;
+      background-color: blue;
+    }
+    .middle {
+      height: 200px;
+      margin: 0 220px;
+      background-color: rgb(255, 74, 74);
+    }
+  </style> -->
+  <!-- <style>
+    /* 两边使用 float，中间使用 margin */
+    .wrap {
+      background: #eee;
+      padding: 20px;
+    }
+    .left {
+      width: 200px;
+      height: 200px;
+      float: left;
+      background: coral;
+    }
+    .right {
+      width: 120px;
+      height: 200px;
+      float: right;
+      background: lightblue;
+    }
+    .middle {
+      height: 200px;
+      background: lightpink;
+      overflow: hidden;
+      margin-right: 120px;
+    }
+  </style> -->
+</html>

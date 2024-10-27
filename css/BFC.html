@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div class="outer">
+      <div class="box box1"></div>
+      <div class="box box2"></div>
+      <div class="box box3"></div>
+    </div>
+  </body>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+    }
+    .outer {
+      width: 100%;
+      background-color: #d0cd1b;
+      /* 开启BFC */
+      /* float: left; */
+      /* position: absolute; */
+      /* position: fixed; */
+      /* overflow: auto; */
+      /* display: inline-block; */
+      /* display: flow-root; */
+    }
+    .box {
+      width: 100px;
+      height: 100px;
+      /* margin-top: 20px; */
+      /* float: left; */
+    }
+    .box1 {
+      background-color: aqua;
+    }
+    .box2 {
+      background-color: red;
+      float: left;
+    }
+    .box3 {
+      background-color: blue;
+      /* float: left; */
+      /* 开启BFC */
+      /* position: absolute; */
+      /* position: fixed; */
+      /* overflow: auto; */
+      /* display: inline-block; */
+      /* display: flow-root; */
+    }
+  </style>
+</html>

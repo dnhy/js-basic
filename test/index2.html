@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        #button{
+            width: 100px;
+            height: 40px;
+            background-color: rgb(95, 125, 160);
+            border: 0px ;
+            position: fixed;
+            left: 50%;
+            transform: translate(-50%,0);
+        }
+        #box {
+            width: 500px;
+            height: 500px;
+            padding: 10px;
+            border: cadetblue solid 20px;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%,-50%);
+            /* overflow: scroll;显示滚动条 */
+            overflow: scroll;
+        }
+        #bigBox{
+            background-color: rgba(150, 121, 67, 0.3);
+            width: 600px;
+        }
+        .ceshi {
+            background-color: rgb(245, 211, 161);
+            width: 100px;
+            height: 100px;
+            padding: 10px;
+            border: rgb(95, 141, 160) solid 20px;
+            margin: 30px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <button id="button">点我测试</button>
+    <div id="box">
+        <div id="bigBox">
+            <!-- 快捷方式输入(手打): div*8#ceshi{测试div$} -->
+            <div class="ceshi">测试div1</div>
+            <div class="ceshi">测试div2</div>
+            <div class="ceshi">测试div3</div>
+            <div class="ceshi">测试div4</div>
+            <div class="ceshi">测试div5</div>
+            <div class="ceshi">测试div6</div>
+            <div class="ceshi">测试div7</div>
+            <div class="ceshi">测试div8</div>
+        </div>
+    </div>
+</body>
+<script>
+    let box = document.getElementById('box')
+    let button = document.getElementById('button');
+    button.onclick=ceshi
+    function ceshi(){
+        // scrollHeight/scrollWidth返回整个元素的高度/宽度（包括带滚动条的隐蔽的地方）
+        // .ceshi(height:100 + padding:10*2 + border:20*2 +margin:30*2 == 220) * 4 + #box(padding:10*2) == 900
+        console.log('scrollHeight', box.scrollHeight);
+        // #bigBox(width:600) + #box(padding:10) == 610
+        console.log('scrollWidth', box.scrollWidth);
+        console.log('scrollLeft', box.scrollLeft);
+        console.log('scrollTop', box.scrollTop);
+
+
+        // 测试页面滚动条
+        // console.log('body',document.body.scrollTop);
+        // console.log('html',document.documentElement.scrollTop);
+    }
+</script>
+</html>

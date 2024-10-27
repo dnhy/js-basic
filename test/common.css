@@ -1,0 +1,8 @@
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  --base-slider-width: 300px;
+  --base-slider-height: 100vh;
+}
