@@ -379,7 +379,7 @@ console.log('aaaa :', aaaa);//aaaa : ldsdlsp
 console.log('defImpt :', defImpt);//defImpt : {nice: 121}
 ```
 
-![image-20240928230352101](/Users/dnhy/Library/Application Support/typora-user-images/image-20240928230352101.png)
+![image-20240928230352101](./md-img/image-20240928230352101.png)
 
 ### 动态加载
 

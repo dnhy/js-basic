@@ -6,9 +6,9 @@
 
 width=content区域的宽度
 
-![image-20240923112618281](/Users/dnhy/Library/Application Support/typora-user-images/image-20240923112618281.png)
+![image-20240923112618281](./md-img/image-20240923112618281.png)
 
-![1.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/2be6e398b05b459f85a74f9eff8bb3ea~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.awebp#?w=875&h=687&s=59373&e=png&b=222326)
+![1.png](./md-img/2be6e398b05b459f85a74f9eff8bb3ea~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.awebp)
 
 优先内容宽度可以用标准盒模型，box-sizing默认就是content-box
 
@@ -28,7 +28,7 @@ width=content区域的宽度+padding+border宽度
 box-sizing:border-box
 ```
 
-![2.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/896141c9129f467898ef6a768d4cf5a5~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.awebp#?w=875&h=687&s=58836&e=png&b=222326)
+![2.png](./md-img/896141c9129f467898ef6a768d4cf5a5~tplv-k3u1fbpfcp-jj-mark:3024:0:0:0:q75.awebp)
 
 ## css单位
 
@@ -178,7 +178,7 @@ align-items: center;
 
 4. Painting(重绘):根据渲染树和回流得到的几何信息，得到节点的绝对像素**绘制**出元素
 
-![](https://static.vue-js.com/2b56a950-9cdc-11eb-ab90-d9ae814b240d.png)
+![](./md-img/2b56a950-9cdc-11eb-ab90-d9ae814b240d.png)
 
 ### 触发原因
 
@@ -232,7 +232,7 @@ offsetTop、offsetLeft、 offsetWidth、offsetHeight、scrollTop、scrollLeft、
 
 ### 概念
 
-![image-20241025173533421](/Users/dnhy/Library/Application Support/typora-user-images/image-20241025173533421.png)
+![image-20241025173533421](./md-img/image-20241025173533421.png)
 
 参考：
 

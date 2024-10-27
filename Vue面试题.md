@@ -2,7 +2,7 @@
 
 渐进式框架：可以按需逐步添加需要的功能。vue的核心库只关注视图层
 
-![image-20241007230020903](/Users/dnhy/Library/Application Support/typora-user-images/image-20241007230020903.png)
+![image-20241007230020903](./md-img/image-20241007230020903.png)
 
 ### 1.声明式渲染（核心特点）
 
@@ -444,7 +444,7 @@ https://juejin.cn/post/7352075662453702694?searchId=20241007140835FDE0F7079CF74D
 
 3.vue3新提供了2个dev调试钩子，1个SSR钩子
 
-![image-20241011173014494](/Users/dnhy/Library/Application Support/typora-user-images/image-20241011173014494.png)
+![image-20241011173014494](./md-img/image-20241011173014494.png)
 
 ### 在哪个生命周期发请求
 
@@ -589,7 +589,7 @@ SSR（Server side ），也就是服务端渲染，组件或页面通过服务�
 
 8.懒加载
 
-![img](https://camo.githubusercontent.com/d42d23b92628c721abfde9dbdf81c4515b0f01940fe522b02c546b9bbde07b23/68747470733a2f2f7374617469632e7675652d6a732e636f6d2f34666166653930302d336163632d313165622d383566362d3666616337376330633962332e706e67)
+![img](./md-img/68747470733a2f2f7374617469632e7675652d6a732e636f6d2f34666166653930302d336163632d313165622d383566362d3666616337376330633962332e706e67.png)
 
 ### 面试题回答整理
 
@@ -704,7 +704,7 @@ https://github1s.com/vuejs/vue/blob/main/src/core/observer/index.ts
 
 watchvue3提供了cleanup清理函数，可用于屏蔽上一次的结果（修改上一次回调函数中的变量值）
 
-![image-20241010112826804](/Users/dnhy/Library/Application Support/typora-user-images/image-20241010112826804.png)
+![image-20241010112826804](./md-img/image-20241010112826804.png)
 
 watch原理:
 
@@ -772,7 +772,7 @@ template->ast tree->render function
 
 [Vue2源码](https://github1s.com/vuejs/vue/blob/main/src/core/instance/index.ts)
 
-![](https://v2.cn.vuejs.org/images/lifecycle.png)
+![](./md-img/lifecycle.png)
 
 ## diff算法
 
@@ -825,7 +825,7 @@ key作用：
 
 2.进行预期的dom更新：如渲染列表时，vue会采用就地更新的策略，如中间插入元素时，会更改每个元素的值，并在末尾新建一个元素后插入，有key时diff算法会复用已有元素，直接可以插入元素后移动列表原有的元素。
 
-![image-20241012103413474](/Users/dnhy/Library/Application Support/typora-user-images/image-20241012103413474.png)
+![image-20241012103413474](./md-img/image-20241012103413474.png)
 
 3.注意尽量不要使用index作为key
 
@@ -901,11 +901,11 @@ Vue.component内部也是Vue.extend，第一个参数会自动使用给定的 `i
 Sub.options=options
 ```
 
-![image-20241012120810844](/Users/dnhy/Library/Application Support/typora-user-images/image-20241012120810844.png)
+![image-20241012120810844](./md-img/image-20241012120810844.png)
 
 如果写成方法，每次调用Sub构造函数创建实例都会重新调用这个data方法，每次都返回不同的对象赋值给当前实例的data属性，所以不同实例取data时就不会共享同一个对象
 
-![image-20241012120749624](/Users/dnhy/Library/Application Support/typora-user-images/image-20241012120749624.png)
+![image-20241012120749624](./md-img/image-20241012120749624.png)
 
 > Vue3使用CreateApp创建一个组件，组件中的data都会是一个函数
 
@@ -923,7 +923,7 @@ vue3中的v-memo通过依赖列表的方式控制页面渲染，依赖列表中�
 
 局部混入，全局混入。全局混入一般用于编写插件，局部混入用于复用逻辑。
 
-![image-20241012194315938](/Users/dnhy/Library/Application Support/typora-user-images/image-20241012194315938.png)
+![image-20241012194315938](./md-img/image-20241012194315938.png)
 
 ## slot
 
@@ -1065,11 +1065,11 @@ LRU缓存淘汰算法：
 
 应用：
 
-![image-20241013121908780](/Users/dnhy/Library/Application Support/typora-user-images/image-20241013121908780.png)
+![image-20241013121908780](./md-img/image-20241013121908780.png)
 
 问题解决：
 
-![image-20241013123718598](/Users/dnhy/Library/Application Support/typora-user-images/image-20241013123718598.png)
+![image-20241013123718598](./md-img/image-20241013123718598.png)
 
 ## 自定义指令
 
@@ -1131,13 +1131,13 @@ LRU缓存淘汰算法：
 
 ## vue项目封装axios
 
-![image-20241014103807694](/Users/dnhy/Library/Application Support/typora-user-images/image-20241014103807694.png)
+![image-20241014103807694](./md-img/image-20241014103807694.png)
 
 具体代码见ggzx
 
 ## vue项目权限管理
 
-![image-20241015103500249](/Users/dnhy/Library/Application Support/typora-user-images/image-20241015103500249.png)
+![image-20241015103500249](./md-img/image-20241015103500249.png)
 
 ## vue3使用CompositionAPI优势
 
@@ -1173,7 +1173,7 @@ app.config.errorHandler = (err, instance, info) => {
 
 3.接口异常处理
 
-![image-20241015135337543](/Users/dnhy/Library/Application Support/typora-user-images/image-20241015135337543.png)
+![image-20241015135337543](./md-img/image-20241015135337543.png)
 
 [Sentry前端监控](https://juejin.cn/post/7211401380769513531)
 
@@ -1183,7 +1183,7 @@ app.config.errorHandler = (err, instance, info) => {
 
 ## Vue3新特性
 
-![image-20241015144157573](/Users/dnhy/Library/Application Support/typora-user-images/image-20241015144157573.png)
+![image-20241015144157573](./md-img/image-20241015144157573.png)
 
 ## vue-router路由守卫钩子
 
