@@ -69,11 +69,10 @@ vue2默认都是自定义事件，需要绑定原生事件，需要添加.native
 
 ## attribute透传
 
-::: warning 
-
-该理解不合理仅做备份，请看[attribute透传解析](#resolve)
-
-::: 
+> [!WARNING] 
+>
+> 该理解不合理仅做备份，请看[attribute透传解析](#resolve)
+>
 
 产生：
 
