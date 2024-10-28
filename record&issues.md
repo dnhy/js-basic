@@ -825,19 +825,7 @@ class的getter、setter函数添加在原型对象上，优先级弱于同名自
 
 可以选择对已有的属性进行劫持，比如_value属性，通过get value和set value劫持
 
-## vue完整版和运行时版(非完整版)选择
 
-最佳实践：总是使用非完整版，然后配合vue-loader和vue文件
-
-完整版带有编译器，原则上是将不编译的.vue代码放到浏览器里编译，但一般不会这样做，在浏览器编译影响性能，一般还是使用vue-loader先完成编译成js，即将模板转换成render函数。
-
-或者只写render函数，就不需要vue-loader编译。
-
-运行时版没有编译器，所以必须先使用vue-loader先完成编译，再去浏览器运行。运行时版本的vue体积更小，缺点是无法使用部分编译器的api(如果必须使用，只能切换成完整版)。
-
-https://zhidao.baidu.com/question/1894643341590049348.html
-
-https://blog.csdn.net/Nicole99618/article/details/114063194
 
 ## Webpack相关
 
@@ -886,142 +874,6 @@ if (module.hot) {
 3.换一种计算策略
 
 前缀和
-
-## Vue 单文件组件 CSS 功能
-
-子组件的根元素使用 `scoped` 后，父组件的样式将不会渗透到子组件中。不过，子组件的根节点会同时被父组件的作用域样式和子组件的作用域样式影响。这样设计是为了让父组件可以从布局的角度出发，调整其子组件根元素的样式。
-
-1.需要子组件添加根节点这条才成立
-
-2.定义后的效果：会产生透传 attribute
-
-module
-
-使用module后正常的赋值会失效，必须要$style.blue
-
-## defineEmits
-
-vue3默认给组件绑定的都是原生事件，默认传递给子组件的根节点，defineEmits可以设置某些父组件传入的事件为自定义事件。如果子组件没有根节点，defineEmits又未设置某些传入的事件，则会有警告，子组件没有继承这些事件，对于这样的事件也无法被调用。
-
-$emit在当前组件触发一个自定义事件，不管有没有根节点、有没有defineEmits设置事件都可以触发
-
-父：
-
-```html
-<EmitTest
-    @click="() => console.log('click is invoked')"
-    @test="() => console.log('test is invoked')"
-  />
-```
-
-子：
-
-```vue
-<template>
-	<div @click="$emit('test')">EmitTestEmitTestEmitTest</div>
-  <div @click="$emit('click')">new testexample</div>
-</template>
-
-<script setup lang="js">
-const emit = defineEmits(['test','click'])
-console.log('emit :', emit)
-emit('test')
-</script>
-
-<style lang="scss" scoped></style>
-
-```
-
-vue2默认都是自定义事件，需要绑定原生事件，需要添加.native修饰符
-
-```html
-<base-input v-on:focus.native="onFocus"></base-input>
-```
-
-## attribute透传
-
-产生：
-
-指未被组件内部定义的defineProp、defineEmits使用的组件上传入的attribute 或者 `v-on` 事件监听器（未defineEmits设置就会被当成子组件根节点的原生事件）
-
-绑定：
-
-对于这些透传的属性和事件如果子组件有根节点，透传的 attribute 就会绑定到根节点上，但这些attribute还是属于透传的
-
-这些透传进来的 attribute 也可以直接用 `$attrs`访问并手动绑定到模板上，使得子组件继承
-
-```html
-<span>Fallthrough attribute: {{ $attrs }}</span>
-```
-```html
-<div class="btn-wrapper"> 
-  <button class="btn" v-bind="$attrs">Click Me</button>
-</div>
-```
-若没有根节点、没有手动绑定$attrs的话子组件就无法继承透传attribute会报警告，这些属性也无法被使用
-
-## $attrs
-
-区别：
-
-vue2$attrs和$listeners分别代表传入组件的属性和事件（不包含.native修饰的）
-
-可以通过 `v-bind="$attrs"` 和v-on="$listeners"传入内部组件
-
-父：
-
-```html
-<base-input v-on:focus="onFocus"></base-input>
-```
-
-子：
-
-```js
-Vue.component('base-input', {
-  inheritAttrs: false,
-  props: ['label', 'value'],
-  computed: {
-    inputListeners: function () {
-      var vm = this
-      // `Object.assign` 将所有的对象合并为一个新对象
-      return Object.assign({},
-        // 我们从父级添加所有的监听器
-        this.$listeners,
-        // 然后我们添加自定义监听器，
-        // 或覆写一些监听器的行为
-        {
-          // 这里确保组件配合 `v-model` 的工作
-          input: function (event) {
-            vm.$emit('input', event.target.value)
-          }
-        }
-      )
-    }
-  },
-  template: `
-    <label>
-      {{ label }}
-      <input
-        v-bind="$attrs"
-        v-bind:value="value"
-        v-on="inputListeners"
-      >
-    </label>
-  `
-})
-```
-
-vue3$attrs包含了属性和事件
-
-vue3$attrs可以使用useAttrs在js中访问
-
-```js
-import { useAttrs } from 'vue'
-
-const attrs = useAttrs()
-```
-
-![image-20241015172109426](/Users/dnhy/Library/Application Support/typora-user-images/image-20241015172109426.png)
 
 ## inclues,indexOf，find、findIndex
 
@@ -1087,3 +939,29 @@ declare接口、命名空间是对象，class是类，module是模块，type是�
 1、 Fetch会根据body自动设置Content-type,axios是否也会呢？
 
 https://zh.javascript.info/fetch	
+
+2、  
+
+## 引入原生类型规范事件名称
+
+这种方式可以在编译时捕获错误，避免了在运行时出现无效的事件名称。同时，它还提供了代码补全和类型检查的支持，使开发过程更加安全和高效。
+
+```ts
+const event: keyof WindowEventMap = "load";
+```
+
+```ts
+// 引用WindowEventMap中的dom事件名称
+type WindowEventName = keyof WindowEventMap;
+
+// 使用WindowEventName来声明事件处理函数
+function handleEvent(event: WindowEventName) {
+  // 处理事件逻辑
+}
+
+// 示例用法
+handleEvent('click'); // 安全引用click事件
+handleEvent('scroll'); // 安全引用scroll事件
+handleEvent('foo'); // 编译错误，foo不是有效的Window事件
+```
+
