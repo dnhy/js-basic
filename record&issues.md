@@ -924,7 +924,7 @@ declare接口、命名空间是对象，class是类，module是模块，type是�
 
 
 
-如何查找.d.ts
+### 如何查找.d.ts
 
 ![image-20241027190435534](/Users/dnhy/Library/Application Support/typora-user-images/image-20241027190435534.png)
 
@@ -932,15 +932,52 @@ declare接口、命名空间是对象，class是类，module是模块，type是�
 
 ![image-20241027191820684](/Users/dnhy/Library/Application Support/typora-user-images/image-20241027191820684.png)
 
+### 索引签名类型
+绝大多数情况下，我们都可以在使用对象前就确定对象的结构，并为对象添加准确的类型。
+
+使用场景：当无法确定对象中有哪些属性（或者说对象中可以出现任意多个属性），此时，就用到索引签名类型了。
+
+- 对象
+
+```ts
+interface AnyObj {
+	[key: string]: number
+}
+
+let obj: AnyObj = {
+  a: 1,
+  b: 2,
+  c: 3
+```
+
+1. 使用 [key: string] 来约束该接口中允许出现的属性名称。表示只要是 string 类型的属性名称，都可以出现在对象中。
+2. 这样，对象 obj 中就可以出现任意多个属性（比如，a、b 等）。
+3. key 只是一个占位符，可以换成任意合法的变量名称。
+4. 隐藏的前置知识：JS 中对象（{}）的键是 string 类型的。
+
+- 数组
+  在 JS 中数组是一类特殊的对象，特殊在数组的键（索引）是数值类型。
+  并且，数组也可以出现任意多个元素。所以，在数组对应的泛型接口中，也用到了索引签名类型。
+
+```ts
+interface MyArray<T> {
+	[n: number]: T
+}
+
+let arr: MyArray<number> = [1, 2, 3]
+```
+
+1. MyArray 接口模拟原生的数组接口，并使用 [n: number] 来作为索引签名类型。
+2. 该索引签名类型表示：只要是 number 类型的键（索引）都可以出现在数组中，或者说数组中可以有任意多个元素。
+3. 同时也符合数组索引是 number 类型这一前提。
+
 ## issues
 
 1、 Fetch会根据body自动设置Content-type,axios是否也会呢？
 
 https://zh.javascript.info/fetch	
 
-2、  
-
-## 引入原生类型规范事件名称
+##  引入原生类型规范事件名称
 
 这种方式可以在编译时捕获错误，避免了在运行时出现无效的事件名称。同时，它还提供了代码补全和类型检查的支持，使开发过程更加安全和高效。
 
@@ -961,5 +998,22 @@ function handleEvent(event: WindowEventName) {
 handleEvent('click'); // 安全引用click事件
 handleEvent('scroll'); // 安全引用scroll事件
 handleEvent('foo'); // 编译错误，foo不是有效的Window事件
+```
+
+## 逻辑运算符**&&**和**||**
+
+**短路现象**‌：
+
+- ‌**&&**‌：如果第一个操作数为假，则不需要计算第二个操作数，因为结果已经确定为假。
+- ‌**||**‌：如果第一个操作数为真，则不需要计算第二个操作数，因为结果已经确定为真。‌
+
+如果第一个操作数未确定结果，看第二个操作数
+
+运算之后总是返回最后一个计算的操作数
+
+```
+21211212121&&null//null
+
+21211212121&&true//true
 ```
 

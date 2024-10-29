@@ -193,6 +193,8 @@ arr[0]();//0
 - cookie
 - sessionStorage
 - localStorage
+
+  安全性不高
 - indexedDB
 
 ## proxy
