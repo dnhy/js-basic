@@ -1017,3 +1017,60 @@ handleEvent('foo'); // 编译错误，foo不是有效的Window事件
 21211212121&&true//true
 ```
 
+## node环境下无法使用ESModule
+
+使用babel-node代替node
+
+7.x版本之前需要加参数：
+
+https://blog.csdn.net/weixin_43094085/article/details/114832738
+
+7.x版本之后不需要加参数：
+
+https://juejin.cn/post/6844903829008285710
+
+如果要使用nodemon:
+
+`nodemon --exec babel-node 'js-info/object.js'`
+
+## babel编译代码
+
+Babel是一个JavaScript编译器，可以将ES6代码转换为ES5代码，使得现有的浏览器可以运行ES6特性。以下是使用Babel编译ES6的基本步骤：
+
+1. 安装Babel CLI和preset环境：
+
+```bash
+npm install --global @babel/cli @babel/preset-env
+```
+
+2. 创建Babel配置文件（如果尚未存在）：
+
+```bash
+mkdir ~/.babelrc
+```
+
+3. 编辑或创建`.babelrc`文件，并添加以下内容：
+
+```json
+{
+  "presets": ["@babel/preset-env"]
+}
+```
+
+4. 编写你的ES6代码，例如在`example.js`文件中：
+
+```javascript
+// example.js
+const sum = (a, b) => a + b;
+console.log(sum(1, 2));
+```
+
+5. 使用Babel编译你的代码：
+
+```bash
+babel example.js --out-file compiled.js
+```
+
+编译后的代码会输出到`compiled.js`文件，Babel会将ES6特性转换为ES5兼容的代码。
+
+或者使用`babel src -d dist`输出到目录
