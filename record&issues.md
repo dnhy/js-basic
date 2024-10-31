@@ -873,9 +873,23 @@ if (module.hot) {
 
 前缀和
 
-## inclues,indexOf，find、findIndex
+## inclues,indexOf
 
-js数组和字符串判断是否存在某个元素都可以用inclues,indexOf，但不存在contains
+js数组和字符串判断是否存在某个元素都可以用inclues,indexOf，但不存在contains。`indexOf` 和 `includes` 使用严格相等 `===` 进行比较
+
+注意：**方法 `includes` 可以正确的处理 `NaN`**
+
+方法 `includes` 的一个次要但值得注意的特性是，它可以正确处理 `NaN`，这与 `indexOf` 不同：
+
+```javascript
+const arr = [NaN];
+alert( arr.indexOf(NaN) ); // -1（错，应该为 0）
+alert( arr.includes(NaN) );// true（正确）
+```
+
+这是因为 `includes` 是在比较晚的时候才被添加到 JavaScript 中的，并且在内部使用了更新了的比较算法。
+
+## ind、findIndex
 
 如果是按照某个条件搜索否符合条件的元素，可以使用find、findIndex
 
@@ -1074,3 +1088,13 @@ babel example.js --out-file compiled.js
 编译后的代码会输出到`compiled.js`文件，Babel会将ES6特性转换为ES5兼容的代码。
 
 或者使用`babel src -d dist`输出到目录
+
+## 数组模拟
+
+- 数组模拟栈
+
+使用push，pop在数组尾部压入弹出元素
+
+- 数组模拟队列
+
+使用push，shift在队尾添加元素，在队头取出元素
