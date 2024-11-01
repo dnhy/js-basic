@@ -77,7 +77,6 @@ let userTest = new (function () {
 })();
 
 function User() {
-  console.log(new.target);
   console.log("this", this instanceof User);
 }
 

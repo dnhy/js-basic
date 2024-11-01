@@ -254,6 +254,17 @@ https://www.zhihu.com/tardis/bd/art/643416626?source_id=1001
 
 ### 基本用法
 
+```js
+export var a =123//export default跟变量声明
+export var b ='wqwqwq'
+export {a,b}//这里不是对象，是上面写法的语法糖
+export function abc() {}
+
+export default a//export default跟js变量
+export default {foo:1221}//这是对象
+export default function abc() {}
+```
+
 ES6模块内部默认开启了严格模式
 
 ```javascript

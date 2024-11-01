@@ -100,13 +100,12 @@ concat可以传多个值，concat会对每个参数行拆解后拼接到新数�
 ```
 
 >  [!WARNING] 
-> 相比之下，Object.assign无法拷贝非对象参数
+>  相比之下，Object.assign无法拷贝非对象参数
 >
-> ```js
-> Object.assign([],[1,2])// [1, 2]
-> Object.assign([],3)// []
-> ```
-> 
+>  ```js
+>  Object.assign([],[1,2])// [1, 2]
+>  Object.assign([],3)// []
+>  ```
 
 如果提供的数据是数组，配合扩展运算符使用可以对数组扁平一层。扩展运算符把数组拆成单个元素，concat对每个元素拆解后拼接到一个数组中。
 
@@ -296,11 +295,19 @@ function eq(a,b){
 
 ## Object.create的使用
 
+创建一个新对象，参数接收一个对象作为新对象的原型对象
+
 `Object.create(null)`可以创建一个没有原型的对象
+
+## Object.freeze的使用
+
+冻结一个对象，使其内部不能增删改属性
 
 ## Array.form的使用
 
 ### 定义
+
+`Array.from` 方法接受对象，检查它是一个**可迭代对象或类数组对象**，然后创建一个新数组，并将该对象的所有元素复制到这个新数组。
 
 ```js
 Array.from(arrayLike, mapFn, thisArg)
@@ -947,6 +954,7 @@ declare接口、命名空间是对象，class是类，module是模块，type是�
 ![image-20241027191820684](/Users/dnhy/Library/Application Support/typora-user-images/image-20241027191820684.png)
 
 ### 索引签名类型
+
 绝大多数情况下，我们都可以在使用对象前就确定对象的结构，并为对象添加准确的类型。
 
 使用场景：当无法确定对象中有哪些属性（或者说对象中可以出现任意多个属性），此时，就用到索引签名类型了。
@@ -991,7 +999,9 @@ let arr: MyArray<number> = [1, 2, 3]
 
 https://zh.javascript.info/fetch	
 
-##  引入原生类型规范事件名称
+2、不能在setup函数中使用defineModel？
+
+##  ts引入原生类型规范事件名称
 
 这种方式可以在编译时捕获错误，避免了在运行时出现无效的事件名称。同时，它还提供了代码补全和类型检查的支持，使开发过程更加安全和高效。
 
@@ -1098,3 +1108,44 @@ babel example.js --out-file compiled.js
 - 数组模拟队列
 
 使用push，shift在队尾添加元素，在队头取出元素
+
+## eval的问题
+
+```js
+let str = "1--2"
+let str2 = "1 - -2"
+eval(str)//报错
+eval(str2)//3
+```
+
+## 遮盖元素使得元素不可点击
+
+使用::after伪类遮住元素
+
+```scss
+&-item {
+  width: 250px;
+  margin: 20px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+  cursor: move;
+  user-select: none;
+  min-height: 100px;
+  position: relative;
+  background-color: #fff;
+    &::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      opacity: 0.2;
+    }
+}
+```
+

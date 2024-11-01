@@ -74,3 +74,52 @@ let soldiers = users.filter(army.canJoin, army);//调用canjoin函数的是windo
 let soldiers = users.filter(user => army.canJoin(user))//调用canjoin函数的是army
 ```
 
+## number类型舍入问题
+
+Math.floor、Math.ceil向下取整、向上取值
+
+Math.round可以四舍五入取整
+
+Math**.**trunc、parseInt、位操作符`|`直接舍弃小数点后的小数取整
+
+parseInt也可以转换字符串前缀是整数的部分为数字
+
+parseFloat转换字符串前缀为整数和小数的部分为数字
+
+toFixed可以对小数点按位数四舍五入，但是如果一个十进制数的二进制存储是无限不循环小数，那toFixed(1)会存在问题
+
+```js
+6.35.toFixed(1) === 6.3 //true
+```
+
+6.35存储为二进制实际上是6.34999999999999964473....（转换回十进制），进行四舍五入一位小数是6.3,而非6.4。所以toFixed实际上是会对实际的二进制数据进行操作，Math.round、运算符等同理，只不过Math.round直接忽视小数不会有这个精度损失的问题。
+
+### 使用toFixed发现转换为二进制后的无限不循环小数
+
+```js
+6.35.toFixed(20) //6.34999999999999964473 
+```
+
+参考：https://blog.csdn.net/MFWSCQ/article/details/97783178
+
+## 调用对象迭代器的方式
+
+- forof自动调用
+
+- 手动调用
+
+```js
+let str = "Hello";
+
+// 和 for..of 做相同的事
+// for (let char of str) alert(char);
+
+let iterator = str[Symbol.iterator]();
+
+while (true) {
+  let result = iterator.next();
+  if (result.done) break;
+  alert(result.value); // 一个接一个地输出字符
+}
+```
+
