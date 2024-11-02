@@ -1149,3 +1149,8 @@ eval(str2)//3
 }
 ```
 
+## 去重
+
+Map的key是唯一的，Set的value是唯一的
+
+所以可以使用map key去重，也可以使用set去重。map去重的同时可以多设置一个value
