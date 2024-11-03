@@ -1001,6 +1001,8 @@ https://zh.javascript.info/fetch
 
 2、不能在setup函数中使用defineModel？
 
+3、defineProps、defineEmits、defineModel不能在setup函数中使用。需要使用选项式api
+
 ##  ts引入原生类型规范事件名称
 
 这种方式可以在编译时捕获错误，避免了在运行时出现无效的事件名称。同时，它还提供了代码补全和类型检查的支持，使开发过程更加安全和高效。
