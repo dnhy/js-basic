@@ -1154,3 +1154,20 @@ eval(str2)//3
 Map的key是唯一的，Set的value是唯一的
 
 所以可以使用map key去重，也可以使用set去重。map去重的同时可以多设置一个value
+
+## vue脚手架配置
+
+```js
+const { defineConfig } = require("@vue/cli-service");
+
+module.exports = defineConfig({
+  publicPath: "./",//部署应用包时的基本 URL。用法和 webpack 本身的 output.publicPath 一致，但是 Vue CLI 在一些其他地方也需要用到这个值，所以请始终使用 publicPath 而不要直接修改 webpack 的 output.publicPath。
+  transpileDependencies: true,
+  configureWebpack: {
+    devtool: "cheap-module-source-map",
+  }, //配置后会使得productionSourceMap关闭
+  // productionSourceMap: true//默认开启
+});
+
+```
+
