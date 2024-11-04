@@ -67,10 +67,10 @@ const throttle2 = function (func, wait = 500) {
   };
 };
 
-const content = document.getElementById('content');
+const content = document.getElementById("content");
 var count = 1;
 
 const countter = () => {
   content.innerHTML = count++;
 };
-content.addEventListener('mousemove', throttle2(countter, 3000));
+content.addEventListener("mousemove", throttle2(countter, 3000));

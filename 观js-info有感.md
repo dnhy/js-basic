@@ -80,7 +80,7 @@ Math.floor、Math.ceil向下取整、向上取值
 
 Math.round可以四舍五入取整
 
-Math.trunc、parseInt、位操作符`|`直接舍弃小数点后的小数取整
+Math.trunc、parseInt、位操作符`| 0`直接舍弃小数点后的小数取整
 
 parseInt也可以转换字符串前缀是整数的部分为数字
 
@@ -111,9 +111,9 @@ toFixed可以对小数点按位数四舍五入，但是如果一个十进制数�
 ```js
 let str = "Hello";
 
-// 和 for..of 做相同的事
-// for (let char of str) alert(char);
 
+// for (let char of str) alert(char);
+// 和 for..of 做相同的事
 let iterator = str[Symbol.iterator]();
 
 while (true) {
@@ -178,3 +178,16 @@ new Set(entries)//每个数组元素作为Set中的元素
 
 ```
 
+## 遍历对象的方式
+
+for key in obj
+
+for [key,value] of Object.entries(obj)
+
+for key of Object.keys(obj)
+
+for value of Object.values(obj)
+
+map
+
+foreach

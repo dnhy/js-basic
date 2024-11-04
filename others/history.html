@@ -16,14 +16,14 @@
     }
 
     function go(path) {
-      window.history.pushState(null, '', path);
+      window.history.pushState(null, "", path);
       render();
     }
 
-    window.addEventListener('popstate', () => {
+    window.addEventListener("popstate", () => {
       render();
     });
 
-    go('/home');
+    go("/home");
   </script>
 </html>
