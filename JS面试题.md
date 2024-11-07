@@ -539,6 +539,8 @@ Function.prototype.bind3 = function (oThis) {
 
 ### 显示转换
 
+手动调用
+
 - Number()
 - parseInt()
 - String()

@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --exec babel-node 'js-info/object.js'",
+    "dev": "nodemon --exec babel-node",
     "build": "babel js-info -d dist",
     "serve": "node dist/server.js"
   },

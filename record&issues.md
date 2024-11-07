@@ -868,17 +868,7 @@ if (module.hot) {
 
 ![image-20241012185702280](/Users/dnhy/Library/Application Support/typora-user-images/image-20241012185702280.png)
 
-## 算法
 
-1.通过策略跳过某些不需要的情况
-
-双指针
-
-2.模拟
-
-3.换一种计算策略
-
-前缀和
 
 ## inclues,indexOf
 
@@ -1003,6 +993,30 @@ let arr: MyArray<number> = [1, 2, 3]
 
 void表示不关心返回的具体类型，不是必须为空
 
+### 联合类型|、交叉类型&
+
+联合类型是二者选其一
+
+交叉类型是两者中的所有属性都需要有
+
+### any和unknown
+
+any是任意类型，相当于全集
+
+unknown是不知道类型，相当于空集。
+
+```ts
+any & string => any
+unknown & string =>string
+```
+
+```
+any | string => any
+unknown | string =>string
+```
+
+
+
 ## issues
 
 1、 Fetch会根据body自动设置Content-type,axios是否也会呢？
@@ -1040,8 +1054,8 @@ handleEvent('foo'); // 编译错误，foo不是有效的Window事件
 
 **短路现象**‌：
 
-- ‌**&&**‌：如果第一个操作数为假，则不需要计算第二个操作数，因为结果已经确定为假。
-- ‌**||**‌：如果第一个操作数为真，则不需要计算第二个操作数，因为结果已经确定为真。‌
+- ‌**&&**‌：如果第一个操作数为假，则不需要计算第二个操作数，因为结果已经确定为假。（短路与）
+- ‌**||**‌：如果第一个操作数为真，则不需要计算第二个操作数，因为结果已经确定为真。‌（短路或）
 
 如果第一个操作数未确定结果，看第二个操作数
 
@@ -1052,6 +1066,29 @@ handleEvent('foo'); // 编译错误，foo不是有效的Window事件
 
 21211212121&&true//true
 ```
+
+例1：
+
+```js
+if(null||123)
+```
+
+null进行隐式类型转换调用Boolean转换为false，由于短路或，第一个操作数为假，会计算第二个操作数。第二个操作数转换为true，由于是最后一个直接返回123。if(123）会进行隐式类型转换，调用Boolean转换为if(true),判断为true执行if中的代码。
+
+null||123可以接单理解为一个false或true，结果就是true，所以是if(true)
+
+例2：
+
+```js
+let a = "qwqwq" || ""//"qwqwq"转换为true，返回第一个操作数"qwqwq"
+let b = undefined || "123"//第一个操作数undefined转换为false，计算第二个操作数，第二个操作数转换为true，由于是最后一个操作数，返回"123"
+let c = 0 || "123"//第一个操作数转换为false，返回第二个"123"
+let c = 0 ?? "123"//第一个操作数不是null/undefined（第一个操作数已定义），返回第一个操作数0
+```
+
+
+
+
 
 ## node环境下无法使用ESModule
 
@@ -1183,3 +1220,23 @@ module.exports = defineConfig({
 
 ```
 
+## mousedown事件与click事件区别
+
+mousedown适合用于拖动、选择文本、长按。
+
+click适合响应用户的快速点击操作、交表单、链接跳转。
+
+1、[触发时机](https://so.csdn.net/so/search?q=触发时机&spm=1001.2101.3001.7020)
+
+- mouseddown：鼠标移动到元素上方，并按下鼠标时触发，左右中键都可以。
+- mouseup：在元素上松开鼠标时触发，左右中键都可以。
+- click：鼠标停留在元素上方，按下鼠标左键，并且松开鼠标左键时触发，只能左键。
+
+[触发顺序](https://so.csdn.net/so/search?q=触发顺序&spm=1001.2101.3001.7020)
+
+- 左键：在同一个元素上按下、并松开，会依次触发mousedown、mouseup、click，前一个事件执行完才会执行下一个事件。
+- 右键：在同一个元素上按下、并松开，会依次触发mousedown、mouseup，前一个事件执行完才会执行下一个事件。
+
+参考：https://zhidao.baidu.com/question/1936524913396297387.html
+
+https://blog.csdn.net/AllBluefm/article/details/135775722

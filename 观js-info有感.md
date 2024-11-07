@@ -82,9 +82,9 @@ Math.round可以四舍五入取整
 
 Math.trunc、parseInt、位操作符`| 0`直接舍弃小数点后的小数取整
 
-parseInt也可以转换字符串前缀是整数的部分为数字
+- parseInt也可以转换字符串前缀是整数的部分为数字
 
-parseFloat转换字符串前缀为整数和小数的部分为数字
+- parseFloat转换字符串前缀为整数和小数的部分为数字
 
 toFixed可以对小数点按位数四舍五入，但是如果一个十进制数的二进制存储是无限不循环小数，那toFixed(1)会存在问题
 
@@ -191,3 +191,122 @@ for value of Object.values(obj)
 map
 
 foreach
+
+## 变量未声明
+
+直接使用未申明的变量、函数都是会报错的
+
+但是非严格模式下可以对未声明的变量进行赋值，会把变量放到全局变量
+
+## var
+
+var没有块级作用域，只有全局和函数作用域
+
+- 在全局用var声明的变量会变成全局变量
+
+  ```js
+  var gVar = 5;
+  
+  console.log(window.gVar); // 5（成为了全局对象的属性）
+  ```
+
+- 如果在全局、块级、函数中不声明直接赋值的变量，都会成为全局对象上的变量
+
+  ```js
+  function test(){
+    gVar = 5
+  }
+  
+  test();
+  
+  console.log(window.gVar); // 5（成为了全局对象的属性）
+  ```
+
+（在js module下以上两条不生效）
+
+## 函数
+
+### 函数属性
+
+函数本身是对象，可以把函数本身的执行逻辑看成对象中的一个属性。函数也可以有其他属性，其他属性不会干扰执行这个属性，也就是不会成为执行代码中的变量，但是可以在执行逻辑中通过func.count的方式拿到函数属性。
+
+### 函数name属性
+
+函数本身有名字就用函数本身的func，没有使用赋值的变量的sayHi。
+
+func、sayHi都可以被函数内部调用，外部只能调用函数name属性的名称sayHi。
+
+```js
+let sayHi = function func(who) {
+  console.log(func.name); //func
+  console.log(sayHi.name); //func
+  
+  func();//允许调用
+  sayHi();//允许调用，但是sayHi可能会被函数外部的代码改变
+};
+
+sayHi();
+func();//报错，因为有了sayHi,func变成了一个“内部函数名”
+
+let sayHi2 = function (who) {
+  console.log(sayHi2.name); //sayHi2
+};
+
+sayHi2();
+```
+
+sayHi可能会被函数外部的代码改变。
+
+```js
+let sayHi = function(who) {
+  if (who) {
+    alert(`Hello, ${who}`);
+  } else {
+    sayHi("Guest"); // Error: sayHi is not a function
+  }
+};
+
+let welcome = sayHi;
+sayHi = null;
+
+welcome(); // Error，嵌套调用 sayHi 不再有效！
+```
+
+发生这种情况是因为该函数从它的外部词法环境获取 `sayHi`。没有局部的 `sayHi` 了，所以使用外部变量。而当调用时，外部的 `sayHi` 是 `null`。
+
+我们给函数表达式添加的可选的名字，正是用来解决这类问题的。
+
+func是一个内部函数名，外部不可调用，所以是可靠的调用自身方式，不会被外部改变。
+
+```js
+let sayHi = function func(who) {
+  if (who) {
+    alert(`Hello, ${who}`);
+  } else {
+    func("Guest"); // 现在一切正常
+  }
+};
+
+let welcome = sayHi;
+sayHi = null;
+
+welcome(); // Hello, Guest（嵌套调用有效
+```
+
+### 函数length属性
+
+```js
+function plus2(a, b, c) {
+  console.log(plus2.length)//3
+  return a + b + c;
+}
+plus2()
+```
+
+```js
+function plus2(...args) {
+  console.log(plus2.length)//0
+}
+plus2()
+```
+
