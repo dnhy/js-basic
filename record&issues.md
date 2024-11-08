@@ -566,6 +566,21 @@ length用于遍历中：虽然这里没写key为0的值，但是length为2默认
 
 类数组对象arguments实现了迭代器，可以被forof遍历。
 
+1. 给类数组对象开绿灯的函数：
+
+Array.from方法参数接收可迭代对象或类数组对象，将其转换为数组
+
+apply方法，第二个参数接受数组或类数组对象，作为函数调用参数
+
+2. 类数组转换为数组的方法,
+
+   ```javascript
+   const arr = [...arguments]
+   const arr2 = Array.from(arguments)
+   const arr3 = Array.property.slice.call(arguments)
+   const arr4 = Array.property.map.call(arguments,item => item)
+   ```
+
 ## line-height
 
 父元素设置后会传递给子元素
@@ -1015,7 +1030,46 @@ any | string => any
 unknown | string =>string
 ```
 
+### extends
 
+接口和类的extends是子类继承父类，子类中的属性多于父类
+
+类型和泛型的extends是子类从父类中扩展，表示子类是由父类的结构扩展而来，或者也可以表示子类的层级比父类低。子类的类型范围小于父类。
+
+### class
+
+```ts
+class PersonTest {
+  constructor(name: string, age: number) {}
+}
+```
+
+PersonTest表示实例的类型，typeof PersonTest表示PersonTest这个类
+
+类<对象
+
+```ts
+type r = typeof PersonTest extends PersonTest ? true : false;//r为true
+```
+
+表示类，等价于typeof PersonTest：
+
+```ts
+type IClazz<T> = new (name: string, age: number) => T;
+```
+
+实例：
+
+```ts
+function createInstance2<T extends new (...args: any) => any>(
+  target: T,
+  ...args: any[]
+): InstanceType<T> {
+  return new target(...args);
+}
+
+createInstance2(PersonTest, "Tom", 23);
+```
 
 ## issues
 

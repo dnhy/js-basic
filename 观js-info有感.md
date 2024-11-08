@@ -125,26 +125,47 @@ while (true) {
 
 ## 遍历对象属性
 
+### 方法
+
 - Object.keys/values/entries 获取所有属性会忽略 symbol 属性
-
-- for..in获取所有属性会忽略 symbol 属性
-
 - Reflect.ownKeys(obj)获取**包括 symbol 属性**的所有属性
-
 - Object.getOwnPropertyNames获取所有属性会忽略 symbol 属性
-
 - Object.getOwnPropertySymbols**获取对象上所有的symbol 属性**
-
 
 以上方法都不能遍历对象原型链上的属性
 
+for..in获取所有属性会忽略 symbol 属性，可以获取**实例+原型**上的属性
+
+### 如果要遍历所有属性
+
+```js
+//实例+原型，包括symbole
+const symKeys = Object.getOwnPropertySymbols(user);
+
+let blArr = Object.getOwnPropertyNames(user);
+
+let allKeys = blArr.concat(symKeys);
+
+for (const key in user) {
+  if (!allKeys.includes(key)) allKeys = allKeys.concat(key);
+}
+
+for (const key of allKeys) {
+  console.log(key, user[key]);
+}
+```
+
+### 设置一个属性不能被forin遍历的方法
+
+设置属性key为symbol类型，或者设置属性的配置enumerable为false
+
 ## 判断对象上是否有某属性的方法
 
-Object.prototype.hasOwnProperty()和Object.hasOwn()实例上的属性，不包含原型上的属性,包含symbol
+Object.prototype.hasOwnProperty()和Object.hasOwn()实例上的属性，不包含原型上的属性，包含symbol
 
 key in obj 所有属性，实例+原型,包含symbol
 
-Object.keys(obj).includes("name") 实例上的属性不包含symbol
+Object.keys(obj).includes("name") 实例上的属性，不包含原型上的属性，不包含symbol
 
 ## 获取对象上的属性
 
@@ -177,20 +198,6 @@ new Map(entries)//Map(3) {'banana' => 2, 'orange' => 4, 'meat' => 8}
 new Set(entries)//每个数组元素作为Set中的元素
 
 ```
-
-## 遍历对象的方式
-
-for key in obj
-
-for [key,value] of Object.entries(obj)
-
-for key of Object.keys(obj)
-
-for value of Object.values(obj)
-
-map
-
-foreach
 
 ## 变量未声明
 
@@ -246,7 +253,7 @@ let sayHi = function func(who) {
 };
 
 sayHi();
-func();//报错，因为有了sayHi,func变成了一个“内部函数名”
+func();//报错，因为有了sayHi,func变成了一个“内部函数名”，仅在函数内部可见
 
 let sayHi2 = function (who) {
   console.log(sayHi2.name); //sayHi2
@@ -308,5 +315,198 @@ function plus2(...args) {
   console.log(plus2.length)//0
 }
 plus2()
+```
+
+## 对象属性配置
+
+```js
+let user = {
+  name: "John",
+  toString() {
+    return this.name;
+  }
+};
+```
+
+用普通方式定义对象属性，默认每个属性
+configurable: true
+enumerable: true
+writable: true
+
+```js
+Object.defineProperty(user, "newProp", {
+  value:'test'
+});
+
+```
+
+用defineProperty定义属性，默认每个属性
+configurable: false
+enumerable: false
+writable: false
+
+除非在定义时显示指定配置。
+
+对于已经定义的属性也可以修改配置
+
+```js
+let user = {
+  name: "John",
+  toString() {
+    return this.name;
+  }
+};
+
+//configurable: true
+//enumerable: true
+//writable: true
+console.log(Object.getOwnPropertyDescriptor(user, 'toString'))
+
+Object.defineProperty(user, "toString", {
+  enumerable: false
+});
+
+//configurable: true
+//enumerable: false
+//writable: true
+console.log(Object.getOwnPropertyDescriptor(user, 'toString'))
+```
+
+## 不可配置标志（configurable:false）
+
+configurable:false会使得该属性无法通过Object.defineProperty修改value、configurable、enumerable、writable这几个配置。
+
+```js
+let user = {
+  name: "John"
+};
+
+Object.defineProperty(user, "name", {
+  writable: false,
+  configurable: false
+});
+```
+
+这样配置了一个用不可更改的常量
+
+## 克隆对象
+
+forin不会包含symbol类型,不会赋值属性配置
+
+```js
+for (let key in user) {
+  clone[key] = user[key]
+}
+```
+
+Object.getOwnPropertyDescriptors返回包含 symbol 类型的和不可枚举的属性在内的 **所有** 属性描述符。
+
+```javascript
+let clone = Object.defineProperties({}, Object.getOwnPropertyDescriptors(obj));
+```
+
+举例:
+
+```js
+ let user = {
+    name: "John"
+  };
+
+  Object.defineProperty(user, "name", {
+    writable: false,
+    configurable: false
+  });
+  let clone = Object.defineProperties({}, Object.getOwnPropertyDescriptors(user));
+  console.log('clone',clone);//{name: 'John'}
+  console.log('1',Object.getOwnPropertyDescriptors(clone))
+//{
+//    "value": "John",
+//    "writable": false,
+//    "enumerable": true,
+//    "configurable": false
+//}
+
+
+  const clone2 = {};
+  for(let key in user){
+    clone2[key] = user[key]
+  }
+  console.log('clone2',clone2)//{name: 'John'}
+  console.log('2',Object.getOwnPropertyDescriptors(clone2))
+//{
+//    "value": "John",
+//    "writable": true,
+//    "enumerable": true,
+//    "configurable": true
+//}
+```
+
+## 属性的 getter 和 setter
+
+属性设置了“getter” 和 “setter” 会在对象中添加一个属性，同时也可以在对象中设置一个同名属性。后定义的那个生效。
+
+## 构造函数/class、对象中使用箭头函数的this指向区别
+
+class相当于构造函数，本身是一个函数，会形成函数作用域，箭头函数本身没有this，定义时会向外层作用域寻找this，就找到了构造函数的this。
+
+所以下面的实例中使用箭头函数的情况下this.value有值，使用一般函数，this执行调用该函数的对象，由于函数引用已经从对象中取出，调用该函数的是全局，所以指向window。
+
+```js
+class Button {
+  constructor(value) {
+    this.value = value;
+    this.click4 = () => {
+      console.log("click4", this.value);
+    };
+    this.click5 = function () {
+      console.log("click5", this.value);
+    };
+  }
+  click3() {
+    console.log("click3", this.value);
+  }
+  click2 = () => {
+    console.log("click2", this.value);
+  };
+  click = function () {
+    console.log("click", this.value);
+  };
+}
+
+let button = new Button("hello");
+console.log("button :", button);
+
+setTimeout(button.click, 1000); // undefined
+setTimeout(button.click2, 1000); // hello
+setTimeout(button.click3, 1000); // undefined
+setTimeout(button.click4, 1000); // hello
+setTimeout(button.click5, 1000); // undefined
+```
+
+对象本身不是作用域，箭头函数本身没有this会向外找，最终找到全局，这里就是window。一般函数this指向调用自己的对象，所以this指向obj。
+
+```js
+const obj = {
+  value: "1212112",
+  click: function () {
+    console.log("objclick", this.value);
+  },
+  click2: () => {
+    console.log("objclick2", this.value);
+    console.log("this :", this);
+  },
+  click3() {
+    console.log("objclick3", this.value);
+  },
+};
+console.log("obj :", obj);
+
+setTimeout(obj.click, 2000); // undefined
+setTimeout(obj.click2, 2000); // undefined
+setTimeout(obj.click3, 2000); // undefined
+
+console.log("!!!!!");
+obj.click2(); // undefined
+console.log("!!!!!");
 ```
 

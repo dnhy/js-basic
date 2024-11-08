@@ -7,6 +7,14 @@ class Animal {
 }
 type IClazz<T> = new (name: string, age: number) => T;
 
+type IPerson = new (name: string, age: number) => Person;
+
+function test233(t: typeof Person) {
+  return t;
+}
+
+test233(Person);
+
 // 函数中的泛型相当于定义了类型的形参，<>位置在函数名之后或形参之前
 function createInstance<T, K>(target: IClazz<T>, name: K, age: number) {
   // 使用IClazz类型的target new的时候，传的name是K，那IClazz里接收的name自然也要是K

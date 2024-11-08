@@ -159,7 +159,7 @@ const attrs = useAttrs()
 
 ![image-20241015172109426](./md-img/image-20241015172109426-0121803.png)
 
-自动绑定后依然可以手动绑定$attrs
+自动绑定后依然可以手动绑定$attrs，绑定后透传的attr中的属性和事件监听器不会减少或消失
 
 ## 直接对defineProps解构使用时自动加上prop引用
 
@@ -245,7 +245,7 @@ defineEmits(['click'])
 
 ### inheritAttrs
 
-设置是否允许透传的属性被自动绑定到根节点上（透传attr还是会存在）
+设置是否允许透传的属性被自动绑定到根节点上这个默认行为（透传attr还是会存在）
 
 ### $emit
 

@@ -4,7 +4,7 @@ function debounced(func, wait) {
   return function () {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => {
-      func.apply(this, arguments);
+      return func.apply(this, arguments);
     }, wait);
   };
 }
@@ -15,8 +15,8 @@ function throttle(func, wait) {
   return function () {
     if (!timer) {
       timer = setTimeout(() => {
-        func(this, arguments);
         timer = null;
+        func(this, arguments);
       }, wait);
     }
   };
