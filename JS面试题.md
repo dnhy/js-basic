@@ -618,12 +618,12 @@ https://www.cnblogs.com/MrZhujl/p/14646846.html
 
 调用构造函数，如果返回对象，new就返回对象；如果不是对象，新建一个对象，原型节点指向构造函数原型对象，返回这个对象
 
-```
+```js
 function new3(func, ...args) {
   const obj = {};
   // obj.__proto__ == func.prototype;
   Object.setPrototypeOf(obj, func.prototype);
-  const res = func.apply(this, args);
+  const res = func.apply(obj, args);
   return typeof res === 'object' ? res : obj;
 }
 ```

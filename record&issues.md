@@ -1294,3 +1294,31 @@ click适合响应用户的快速点击操作、交表单、链接跳转。
 参考：https://zhidao.baidu.com/question/1936524913396297387.html
 
 https://blog.csdn.net/AllBluefm/article/details/135775722
+
+## js module
+
+**浏览器环境默认只支持ESModule，node环境默认只支持CommonJs**
+
+如何兼容：
+
+1. 浏览器环境使用script标签时加上type=module，可以使导入的js使用ESModule
+
+```html
+<script type="module" src="./class2.js"></script>
+```
+
+2. 可以使用Webpack，Browserify 等工具都能很好将 CommonJS 语法转换为浏览器能理解的语法，比如立即执行函数。
+
+3. node环境可以使用babel-node、webpack使其支持ESModule
+
+https://blog.csdn.net/weixin_44502231/article/details/124133122
+
+## 观察者模式和发布订阅模式的区别
+
+![image-20241110112306024](./md-img/image-20241110112306024.png)
+
+1.观察者模式是观察者和目标直接交互，发布订阅模式由调度中心统一处理发布和订阅，可以在触发事件时添加扩展功能。
+
+2.订阅之后，观察者模式是自动触发事件，发布订阅模式是发布者手动发布消息后触发事件。
+
+参考：https://blog.csdn.net/weixin_68266812/article/details/136182188

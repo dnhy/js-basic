@@ -229,7 +229,7 @@ var没有块级作用域，只有全局和函数作用域
   console.log(window.gVar); // 5（成为了全局对象的属性）
   ```
 
-（在js module下以上两条不生效）
+（在js module下以上两条不生效，非js module环境下即使是严格模式也生效）
 
 ## 函数
 
@@ -443,6 +443,10 @@ let clone = Object.defineProperties({}, Object.getOwnPropertyDescriptors(obj));
 
 ## 属性的 getter 和 setter
 
+对象中声明的getter 和 setter在实例对象上
+
+类中声明的在原型对象上
+
 属性设置了“getter” 和 “setter” 会在对象中添加一个属性，同时也可以在对象中设置一个同名属性。后定义的那个生效。
 
 ## 构造函数/class、对象中使用箭头函数的this指向区别
@@ -508,5 +512,268 @@ setTimeout(obj.click3, 2000); // undefined
 console.log("!!!!!");
 obj.click2(); // undefined
 console.log("!!!!!");
+```
+
+## class
+
+typeof Class为function
+
+class与一般构造函数的区别：
+
+1. 通过 `class` 创建的函数具有特殊的内部属性标记 `[[IsClassConstructor]]: true`。
+
+2. 类方法不可枚举。 类定义将 `"prototype"` 中的所有方法的 `enumerable` 标志设置为 `false`。
+
+   这很好，因为如果我们对一个对象调用 `for..in` 方法，我们通常不希望 class 方法出现。
+
+3. 类总是使用 `use strict`。 在类构造中的所有代码都将自动进入严格模式。
+
+### constructor
+
+没有constructor会默认添加一个空的：
+
+```js
+class Rabbit{
+  constructor() {}
+}
+```
+
+### class字段
+
+**之前可以在类中直接添加原型方法，在构造函数中添加实例属性和方法**
+
+**现在也可以在class中添加实例属性**
+
+```js
+class User2 {
+  newProp = 1213;
+  
+  constructor(name) {
+    this.name = name;
+    this.speak = () => {};
+  }
+
+  sayHi() {
+    console.log(this.name);
+  }
+}
+
+```
+
+
+
+## extends
+
+super.func()可以在继承的子类调用父类中的方法
+
+### constructor
+
+如果一个类扩展了另一个类并且没有 `constructor`，那么将生成下面这样的“空” `constructor`：
+
+```js
+class Rabbit extends Animal {
+  // 为没有自己的 constructor 的扩展类生成的
+  constructor(...args) {
+    super(...args);
+  }
+}
+```
+
+### [[ConstructorKind]]:"derived"
+
+继承类具有特殊的内部属性 `[[ConstructorKind]]:"derived"`。这是一个特殊的内部标签。该标签会影响它的 `new` 行为：
+
+ 当继承的 constructor 执行时，创建一个空对象后，不会将其赋值给this。它期望父类的 constructor 来完成这项工作。
+
+所以**继承类的 constructor 必须调用 `super(...)`，并且 (!) 一定要在使用 `this` 之前调用。**
+
+因为子类new时this的指向改为当前创建的对象这个操作需要交给父类构造函数进行
+
+### 子类重写字段问题
+
+如果父类字段被重写，super调用父类构造器时总是使用父类的吗，而不用子类重写的。父类方法被重写时，父类构造器会用子类的。
+
+**父类构造器总是会使用它自己字段的值，而不是被重写的那一个**
+
+1. 原因分析：
+
+实际上，原因在于字段初始化的顺序。类字段是这样初始化的：
+
+- 对于基类（还未继承任何东西的那种），在构造函数调用前初始化。
+- 对于派生类，在 `super()` 后立刻初始化
+
+也就是说父类构造器被调用时，子类字段还未初始化，所以用父类的字段。
+
+2. 问题修复：使用方法或者 getter/setter 替代类字段
+
+## static
+
+通常，静态方法用于实现属于整个类，但不属于该类任何特定对象的函数。
+
+### 静态方法
+
+在 `User.staticMethod()` 调用中的 `this` 的值是类构造器 `User` 自身（“点符号前面的对象”规则）。
+
+```js
+class User { }
+
+User.staticMethod = function() {
+  alert(this === User);
+};
+
+User.staticMethod(); // true
+```
+
+### 静态属性
+
+静态的属性也是可能的，它们看起来就像常规的类属性，但前面加有 `static`：
+
+```javascript
+class Article {
+  static publisher = "Levi Ding";
+}
+
+alert( Article.publisher ); // Levi Ding
+```
+
+这等同于直接给 `Article` 赋值：
+
+```javascript
+Article.publisher = "Levi Ding";
+```
+
+### 继承的静态属性和方法
+
+“extends” 语法会设置两个原型：
+
+1. 在构造函数的 `"prototype"` 之间设置原型（为了获取实例方法）。
+2. 在构造函数之间会设置原型（为了获取静态方法）。
+
+因此可以得出：
+
+- 子类继承自父类，所以子类可以访问到父类的静态方法和属性。
+- 子类的prototype继承自父类的prototype
+- 子类的对象由子类构造，继承自父类的prototype，所以对象可以访问子类和父类的prototype对象中的属性和方法。
+- 所有的类都隐式继承自Object，但只设置1
+- 由于上面1点，导致所有的对象通常都继承自 `Object.prototype`。
+
+## 类显式加上extends Object和不加的区别
+
+所有的类都原型链继承自Object，但不是extends Object。原型链继承只会在构造函数的 `"prototype"` 之间设置原型，而不会在构造函数之间会设置原型，所以可以使用父类的实例方法，不能用静态方法。
+
+extends Object加上后，意味着：
+
+```javascript
+class Rabbit extends Object {}
+
+alert( Rabbit.prototype.__proto__ === Object.prototype ); // (1) true
+alert( Rabbit.__proto__ === Object ); // (2) true
+```
+
+**Rabbit` 可以通过 `Rabbit` 访问 `Object` 的静态方法**，像这样：
+
+```javascript
+class Rabbit extends Object {}
+
+// 通常我们调用 Object.getOwnPropertyNames
+alert ( Rabbit.getOwnPropertyNames({a: 1, b: 2})); // a,b
+```
+
+但是如果我们没有 `extends Object`，那么 `Rabbit.__proto__` 将不会被设置为 `Object`。
+
+下面是示例：
+
+```javascript
+class Rabbit {}
+
+alert( Rabbit.prototype.__proto__ === Object.prototype ); // (1) true
+alert( Rabbit.__proto__ === Object ); // (2) false (!)
+alert( Rabbit.__proto__ === Function.prototype ); // true，所有函数都是默认如此
+
+// error，Rabbit 中没有这样的函数
+alert ( Rabbit.getOwnPropertyNames({a: 1, b: 2})); // Error
+```
+
+所以，在这种情况下，`Rabbit` 没有提供对 `Object` 的静态方法的访问。
+
+另外不管加不加`extends Object`，类都可以访问Function.prototype中的方法（call，bind等），不加类直接继承自Function.prototype（类本质是一个函数），加了之后类本身继承自Object，Object本身继承自Function.prototype。
+
+所以，简而言之，这里有两点区别：
+
+| class Rabbit                              | class Rabbit extends Object         |
+| :---------------------------------------- | :---------------------------------- |
+| –                                         | 需要在 constructor 中调用 `super()` |
+| `Rabbit.__proto__ === Function.prototype` | `Rabbit.__proto__ === Object`       |
+| 传统的继承                                | 类的extends继承                     |
+
+相同点：
+
+Rabbit.prototype.\_\_proto\_\_ = Object.prototype
+
+### 总结
+
+所有的对象都可以使用构造类中定义的实例方法，构造类的原型方法、父类中定义的实例方法（调用了super），父类的原型方法（构造类的prototype继承了父类的prototype），Object的原型方法（类的prototype继承自Object的prototype）。**也就是说对象继承所有父类实例和原型上的一切，除了静态属性和方法**。
+
+所有的类都可以使用自己的静态方法，父类的静态方法。可以使用Function的原型方法，但无法使用Object的静态方法（**类的继承被默认设定成了Function.prototype**，所有的函数也都是这样）。
+
+所有的函数本身继承自Function.prototype，函数原型继承自Object.prototype。所以可以使用Function原型中的方法。
+
+### 函数传统的继承和类的extends比较：
+
+函数原型链继承（传统的继承）：
+
+子函数原型直接继承父函数原型，子函数本身继承自Function.prototype
+
+类的extends：
+
+子类原型直接继承父类原型，子类本身继承自父类
+
+## 受保护的属性
+
+**受保护的属性通常以下划线 `_` 作为前缀。**
+
+这不是在语言级别强制实施的，但是程序员之间有一个众所周知的约定，即不应该从外部访问此类型的属性和方法。
+
+1.可以使用getter/setter 语法设置一个新的变量对_前缀变量进行访问和修改
+
+2.也可以使用`get.../set...` 函数通过函数取访问
+
+## 只读属性
+
+只设置getter不设置setter
+
+## 私有属性
+
+私有属性和方法应该以 `#` 开头。它们只在类的内部可被访问，且被子类继承后也不能访问，私有字段也不能通过 this[name] 访问。
+
+一般不用，而使用受保护的字段
+
+```js
+class CoffeeMachine {
+  #waterLimit = 200;
+
+  #fixWaterAmount(value) {
+    if (value < 0) return 0;
+    if (value > this.#waterLimit) return this.#waterLimit;
+  }
+
+  setWaterAmount(value) {
+    this.#waterLimit = this.#fixWaterAmount(value);
+  }
+}
+
+let coffeeMachine = new CoffeeMachine();
+
+// 不能从类的外部访问类的私有属性和方法
+coffeeMachine.#fixWaterAmount(123); // Error
+coffeeMachine.#waterLimit = 1000; // Error
+
+class MegaCoffeeMachine extends CoffeeMachine {
+  method() {
+    alert( this.#waterAmount ); // Error: can only access from CoffeeMachine
+  }
+}
+
+this['#name']//不能访问
 ```
 
