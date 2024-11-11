@@ -777,3 +777,63 @@ class MegaCoffeeMachine extends CoffeeMachine {
 this['#name']//不能访问
 ```
 
+## Promise
+
+### then
+
+then中的函数可以看作是隐式返回了一个promise，return的值就是这个promise的resolve的值，如果发送错误继续抛出报错，就返回一个promise并在其中reject这个抛出的错误。
+
+### finally
+
+- finally可以添加附加逻辑，不接受上一层的返回值（回调函数没有参数），而是直接将结果传给下一层。
+- 如果 `finally` 处理程序返回了一些内容，那么这些内容会被忽略。
+- 当 `finally` 抛出 error 时，执行将转到最近的 error 的处理程序。
+
+### catch
+
+promise调用reject之后会由最近的catch捕获错误
+
+在 executor 周围有一个“隐式 `try..catch`”自动捕获了 error，并将其变为 rejected promise。
+
+`try..catch`只能捕获代码同步运行时的错误，异步的错误无法捕获
+
+这里的错误并不是在 executor 运行时生成的，而是在稍后生成的。因此，promise 无法处理它。
+
+```js
+new Promise((resolve, reject) => {
+  setTimeout(() => {
+    func();//catch无法捕获这个函数不存在的错误
+  });
+}).catch((err) => {
+  console.log("1112", err);
+});
+```
+
+```js
+
+try {
+  setTimeout(() => {
+    func();//catch无法捕获这个函数不存在的错误
+  });
+} catch (error) {
+  console.error("error111", error);
+}
+
+```
+
+需要在异步任务的executor上进行捕获
+
+```js
+try {
+  setTimeout(() => {
+    try {
+      func();
+    } catch (error) {
+      console.error("error222", error);//可以捕获
+    }
+  });
+} catch (error) {
+  console.error("error111", error);
+}
+```
+

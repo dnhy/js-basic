@@ -546,6 +546,8 @@ XMLHttpRequest是对ajax技术的实现，可以使用原生XMLHttpRequest发送
 
 axios和jquery都是封装了XMLHttpRequest对象
 
+> 在Node.js中，默认情况下不能使用`XMLHttpRequest`，因为它是为浏览器环境设计的，而Node.js是一个服务器端的JavaScript运行环境。Node.js提供了一个类似的模块叫做`http`或`https`模块。或者也可以使用一个[xmlhttprequest库](https://blog.csdn.net/gitblog_00220/article/details/142197725)模拟浏览器的xhr。
+
 ### Fetch
 
 Fetch也是对ajax技术的实现
@@ -1322,3 +1324,4 @@ https://blog.csdn.net/weixin_44502231/article/details/124133122
 2.订阅之后，观察者模式是自动触发事件，发布订阅模式是发布者手动发布消息后触发事件。
 
 参考：https://blog.csdn.net/weixin_68266812/article/details/136182188
+

@@ -1,6 +1,6 @@
-const PENDING = 'pending';
-const RESOLVED = 'resolved';
-const REJECTED = 'rejected';
+const PENDING = "pending";
+const RESOLVED = "resolved";
+const REJECTED = "rejected";
 
 function MyPromise(fn) {
   const that = this;
@@ -13,7 +13,7 @@ function MyPromise(fn) {
     if (that.state === PENDING) {
       that.state = RESOLVED;
       that.value = value;
-      // resolvedCallbacks 和 rejectedCallbacks 用于保存 then 中的回调，
+      // resolvedCallbacks 和 rejectedCallbacks 用于保存 then 中的回调，之后在这里调用
       // 因为当执行完 Promise 时状态可能还是等待中（异步调用resolve），这时候应该把 then 中的回调保存起来用于状态改变时使用
       that.resolvedCallbacks.map((cb) => cb(that.value));
     }
@@ -38,14 +38,14 @@ function MyPromise(fn) {
 MyPromise.prototype.then = function (onFullfilled, onRejected) {
   const that = this;
   // 判断传入的是否是函数
-  onFullfilled = typeof onFullfilled === 'function' ? onFullfilled : (v) => v;
+  onFullfilled = typeof onFullfilled === "function" ? onFullfilled : (v) => v;
   onRejected =
-    typeof onRejected === 'function'
+    typeof onRejected === "function"
       ? onRejected
       : (r) => {
           throw r;
         };
-  // 异步调用，状态还没改变，先保存起来，等状态改变后调用
+  // 异步调用，状态还没改变，先保存起来，等调用resolve或reject后调用
   if (that.state === PENDING) {
     this.resolvedCallbacks.push(onFullfilled);
     that.rejectedCallbacks.push(onRejected);
@@ -70,11 +70,11 @@ MyPromise.prototype.then = function (onFullfilled, onRejected) {
 
 new MyPromise((resolve, reject) => {
   //   resolve(1);
-  reject('112');
+  reject("112");
 })
   .then(
     (res) => {
-      console.log('res :', res);
+      console.log("res :", res);
       return 123;
     },
     (err) => {
@@ -82,5 +82,5 @@ new MyPromise((resolve, reject) => {
     },
   )
   .then((res2) => {
-    console.log('res2 :', res2);
+    console.log("res2 :", res2);
   });
