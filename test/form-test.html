@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- action="https://zh.javascript.info/article/formdata/post/user"
+      method="post"
+      enctype="multipart/form-data" -->
+    <form
+      id="formElem"
+      enctype="multipart/form-data"
+      method="post"
+      onsubmit="submitForm(event)"
+    >
+      <input type="text" name="firstName" value="John" />
+      Picture:
+      <input type="file" name="picture" accept="image/*" />
+      <input type="submit" />
+    </form>
+  </body>
+  <script>
+    function submitForm(event) {
+      // 取消form上的一切配置，包括action、method、enctype、提交后的跳转行为
+      event.preventDefault();
+      var formdata = new FormData(formElem);
+      console.log(Array.from(formdata.entries()));
+
+      const data = {
+        name: "Tom",
+        age: 12,
+      };
+
+      const queryString = Object.keys(data)
+        .map(
+          (key) =>
+            encodeURIComponent(key) + "=" + encodeURIComponent(data[key]),
+        )
+        .join("&");
+
+      fetch("https://zh.javascript.info/article/formdata/post/user", {
+        method: "POST",
+        body: JSON.stringify({
+          test: 111,
+        }),
+        headers: {
+          "content-type": "application/json",
+        },
+      }).then((response) => {
+        console.log(response);
+      });
+    }
+  </script>
+</html>

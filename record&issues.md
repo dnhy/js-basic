@@ -1325,3 +1325,123 @@ https://blog.csdn.net/weixin_44502231/article/details/124133122
 
 参考：https://blog.csdn.net/weixin_68266812/article/details/136182188
 
+
+
+## clientX、offsetX、screenX、pageX、x的区别
+
+https://download.csdn.net/blog/column/9738530/106440260
+
+base64图片传给后端
+
+转成file，文件上传
+
+https://blog.csdn.net/qq_53513969/article/details/134596885
+
+## 发送请求传入的数据类型
+
+*`Content-Type`*可以手动指定请求数据类型，如果不指定会根据body内容进行默认设置
+
+### x-www-form-urlencoded
+
+浏览器默认的请求数据编码格式,[URLSearchParams](https://zh.javascript.info/url)
+
+发送post请求，queryString会放入请求体中
+
+如果是get请求，queryString就放到url上
+
+```js
+const data = {
+      name: "Tom",
+      age: 12,
+    };
+
+//自行构建参数
+const queryString = Object.keys(data)
+  .map(
+    (key) =>
+      encodeURIComponent(key) + "=" + encodeURIComponent(data[key]),
+  )
+  .join("&");
+
+//或者使用URLSearchParams对象来构建参数
+// 创建URLSearchParams对象
+const params = new URLSearchParams();
+params.append('param1', 'value1');
+params.append('param2', 'value2');
+ 
+// 将URLSearchParams对象转换为字符串
+const query = params.toString();
+
+fetch("https://zh.javascript.info/article/formdata/post/user", {
+  method: "POST",
+  body: queryString,
+  headers: {
+    "content-type": "application/x-www-form-urlencoded",
+  },
+}).then((response) => {
+  console.log(response);
+});
+```
+
+### application/form-data
+
+FormData是表示表单的数据对象。
+
+new FormData(id)传入表单id，可以捕获 HTML 表单字段。
+
+也可以new FormData创建自己的表单对象，使用formData.append方法添加字段。
+
+fetch调用传入FormData类型的数据，会自带"content-type": "application/form-data"。
+
+这个类型可以上传二进制文件，类似普通的表单提交。
+
+```html
+<form id="formElem" onsubmit="submitForm(event)">
+  <input type="text" name="firstName" value="John" />
+  Picture:
+  <input type="file" name="picture" accept="image/*" />
+  <input type="submit" />
+</form>
+```
+
+```js
+var formdata = new FormData(formElem);
+FormData.append('test','11111');
+
+console.log(Array.from(formdata.entries()));
+
+fetch("https://zh.javascript.info/article/formdata/post/user", {
+  method: "POST",
+  body: formdata,
+  headers: {
+    "content-type": "application/form-data",
+  },
+}).then((response) => {
+  console.log(response);
+});
+```
+
+### application/json
+
+```js
+fetch("https://zh.javascript.info/article/formdata/post/user", {
+  method: "POST",
+  body: JSON.stringify({
+    test: 111,
+  }),
+  headers: {
+    "content-type": "application/json",
+  },
+}).then((response) => {
+  console.log(response);
+});
+```
+
+使用axios会自动将请求体中传入的对象body对象序列化为JSON字符串
+
+参考：
+
+https://blog.51cto.com/u_11990719/3100194
+
+https://zhuanlan.zhihu.com/p/139181285
+
