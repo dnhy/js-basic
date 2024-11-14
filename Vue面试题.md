@@ -65,6 +65,135 @@ MVC应用到前端时需要操作dom写很多controller，使用MVVM将这些dom
 - 监听器（Observer）：对所有数据的属性进行监听
 - 解析器（Compiler）：对每个元素节点的指令进行扫描和解析,根据指令替换数据,以及绑定相应的更新函数
 
+## SPA
+
+### SPA与MPA对比
+
+**spa**：单页面应用，由一个主页面和多个单页面片段组成，采用局部刷新，页面切换快。
+
+默认打包后只有一个html页面，并提供一个挂载点，会在此页面中引入对应的js资源。切换页面时通过监听路由变化，渲染对应的页面。
+
+属于客户端渲染（CSR）：浏览器请求获取html、js之后还需要解析获取虚拟dom，转换成真实dom。
+
+seo优化难实现，首屏加载较慢：原因是浏览器请求返回的html里只有一个app节点，没有任何内容，无法seo优化。然后再请求js，浏览器解析后生成真实dom，这样白屏时间较长。
+
+**mpa**：多页应用，由多个html页面组成，采用整页刷新，页面切换速度较慢。
+
+属于服务端渲染SSR：服务端返回完整的html，数据既可以在客户端发送ajax请求获取，也可以在后端获取之后由服务端一并返回（服务端压力较大）。
+
+|                 | 单页面应用（SPA）         | 多页面应用（MPA）                   |
+| --------------- | ------------------------- | ----------------------------------- |
+| 组成            | 一个主页面和多个页面片段  | 多个主页面                          |
+| 刷新方式        | 局部刷新                  | 整页刷新                            |
+| url模式         | 哈希模式                  | 历史模式                            |
+| SEO搜索引擎优化 | 难实现，可使用SSR方式改善 | 容易实现                            |
+| 数据传递        | 容易                      | 通过url、cookie、localStorage等传递 |
+| 页面切换        | 速度快，用户体验良好      | 切换加载资源，速度慢，用户体验差    |
+| 维护成本        | 相对容易                  | 相对复杂                            |
+
+### 解决首屏加载速度慢
+
+原因：
+
+1.网络延时
+
+2.资源文件过大
+
+3.资源重复发送请求加载
+
+4.加载脚本时渲染内容堵塞
+
+解决：
+
+1.减小入口文件体积：路由懒加载
+
+2.静态资源本地缓存
+
+前端：使用localstorage
+
+后端：
+
+- 采用`HTTP`缓存，设置`Cache-Control`，`Last-Modified`，`Etag`等响应头
+- 采用`Service Worker`离线缓存
+
+3.UI框架按需加载
+
+4.组件重复打包
+
+进行代码拆分:
+
+假设`A.js`文件是一个常用的库，现在有多个路由使用了`A.js`文件，这就造成了重复下载
+
+解决方案：在`webpack`的`config`文件中，修改`CommonsChunkPlugin`的配置（webpack5是SplitChunksPlugin，开箱即用）
+
+```
+minChunks: 3
+```
+
+`minChunks`为3表示会把使用3次及以上的包抽离出来，放进公共依赖文件，避免了重复加载组件
+
+5.压缩图片
+
+对于所有的图片资源，我们可以进行适当的压缩
+
+对页面上使用到的`icon`，可以使用在线字体图标，或者雪碧图，将众多小图标合并到同一张图上，用以减轻`http`请求压力。
+
+6.开启Gzip压缩
+
+使用compression-webpack-plugin插件，配置webpack
+
+```js
+const CompressionPlugin = require('compression-webpack-plugin')
+
+configureWebpack: (config) => {
+        if (process.env.NODE_ENV === 'production') {
+            // 为生产环境修改配置...
+            config.mode = 'production'
+            return {
+                plugins: [new CompressionPlugin({
+                    test: /\.js$|\.html$|\.css/, //匹配文件名
+                    threshold: 10240, //对超过10k的数据进行压缩
+                    deleteOriginalAssets: false //是否删除原文件
+                })]
+            }
+        }
+```
+
+在服务器我们也要做相应的配置 如果发送请求的浏览器支持`gzip`，就发送给它`gzip`格式的文件 我的服务器是用`express`框架搭建的 只要安装一下`compression`就能使用
+
+```js
+const compression = require('compression')
+app.use(compression())  // 在其他中间件使用之前调用
+```
+
+7.使用SSR
+
+SSR（Server side ），也就是服务端渲染，组件或页面通过服务器生成html字符串，再发送到浏览器
+
+首屏采用服务端渲染的方式，后续采用CSR
+
+8.懒加载
+
+![img](./md-img/68747470733a2f2f7374617469632e7675652d6a732e636f6d2f34666166653930302d336163632d313165622d383566362d3666616337376330633962332e706e67.png)
+
+### 面试题回答整理
+
+1.使用路由懒加载（加载首页时只需要加载首页的路由组件文件，不使用懒加载的组件文件在首页路由访问时都会被加载，但是组件不会挂载，要访问组件路由才会开始挂载）、异步组件（使用按需加载），其中异步组件可以实现组件拆分异步加载，并配合使用webpack分包减少入口文件体积大小
+
+2.骨架屏优化体验
+
+3.抽出公共代码，splitChunks进行代码分割
+
+4.静态资源（其中的打包好的js、css、html）缓存，采用http缓存、使用localstorage实现缓存资源
+
+5.图片资源的压缩，雪碧图、对小图片进行base64减少http请求
+
+6.打包开启gzip压缩处理，使用compression-webpack-plugin插件
+
+7.静态资源使用CDN提速（终极手段，就近访问）
+
+8.SSR服务端渲染（直接得到渲染好的html，不需要请求html后再请求js再对js解析）
+
 ## 模板渲染逻辑
 
 ### 挂载阶段
@@ -145,11 +274,13 @@ https://blog.csdn.net/My_wife_QBL/article/details/140171606
 - 数据是响应式的，就是说数据变化后会自动执行watcher或者effect
 - 组件要合理划分，不拆分会要整个页面都更新，拆分过细会导致watcher、effect产生过多，调用过多也会造成性能浪费
 
-> 既然vue通过数据劫持可以精准探测数据变化，为什么还需要dom进行diff检测差异？
+> **既然vue通过数据劫持可以精准探测数据变化，为什么还需要dom进行diff检测差异？**
 >
-> vue内部设计原因：vue是每个组件一个watcher，未采用一个属性一个watcher（大量watcher产生浪费内存）。使用组建级watcher之后，属性变化会导致当前所属组件的整体更新，组件的更新就采用虚拟dom+diff算法比对进行优化。
+> 原本1.0是通过一个数据一个watcher探测数据变化，但是数据量大时性能较差
+>
+> vue内部设计原因：1.vue2.0之后是每个组件产生一个watcher，没有采用一个属性一个watcher（大量watcher产生浪费内存）。2.使用**组件级watcher**之后，属性变化会导致当前所属组件的整体更新，因此组件的更新就只能采用虚拟dom+diff算法比对进行优化。
 
-## Vue3响应式原理
+## Vue3响应式原理(废弃)
 
 ### 什么是响应式
 
@@ -185,17 +316,21 @@ vue3使用Proxy代替Object.defineProperty进行**数据代理**，并对目标�
 
 ## 响应式数据的理解/vue2和vue3响应式数据对比
 
+### 什么是响应式数据
+
+数据取值和修改值时都可以被观察到
+
 ### 如何进行数据劫持
 
-vue2对象采用defineReactive，通过Object.defineProperty劫持属性，添加get和set函数重写属性（只能对已经存在的属性进行劫持）；数组采用重写数组的方法来实现；多层对象通过递归实现。
+vue2对象采用defineReactive，底层是通过**Object.defineProperty**劫持属性，添加get和set函数重写属性（只能对已经存在的属性进行劫持），多层对象通过递归实现；数组采用重写数组的方法来实现。
 
-vue3采用proxy
+vue3采用**proxy**
 
 ### vue2缺陷
 
-1.Object.defineProperty进行数据劫持重写属性性能差
+1.Object.defineProperty进行数据劫持**重写**属性添加getter和setter性能差
 
-2.当新增和删除属性时无法监控变化，需要通过$set、$delete实现
+2.当新增和删除属性时无法监控变化（用的时候之前已经劫持过了，不会再劫持一次新的数据），需要通过$set、$delete实现
 
 3.数组不采用Object.defineProperty劫持（原因是浪费性能，会对所有索引进行劫持），导致需要对数组进行单独处理
 
@@ -206,6 +341,16 @@ vue3采用proxy
 1.数据层级不要太深，不然重复递归影响性能
 
 2.不要过多触发get函数，可以先把响应式数据的值赋值给一个新的值，用新值计算后再赋值给响应式数据
+
+### Vue3优势
+
+1.使用**代理**而不是重写属性，性能较好
+
+2.代理整个对象，新增和删除属性也可以被检测到
+
+3.支持数组的劫持
+
+4.根数据不一定必须是对象，可以自己定义响应式数据
 
 ### vue2与vue3实现对比
 
@@ -228,9 +373,11 @@ function defineReactive(target, key, value) {
   observer(value)
   Object.defineProperty(target, key, {
     get() {
+      //get时加到组件watcher
       return value
     },
     set(newValue) {
+      //set时调用组件watcher
       if (value !== newValue) {
         value = newValue
         // 对新的值进行劫持
@@ -275,7 +422,11 @@ console.log('p :', p)
 console.log(p.n)
 ```
 
+属性劫持和代理的区别：
 
+劫持针对的是属性，往对象中添加getter和setter重写属性，属性访问和变化可以检测到，但是新增属性和删除属性不会再写getter和setter，所以检测不到。
+
+代理针对的是对象，代理对象的属性变化可以检测到，往代理对象新增和删除也可以
 
 ## vue中如何检测数组的变化
 
@@ -285,7 +436,21 @@ console.log(p.n)
 
 > 变异方法是指能改变原数组的方法
 
-由于只重写了方法劫持调用变异方法的操作而没有劫持每一项，所以数组的索引和长度变化是无法监控到的，需要通过vm.$set、vm.$delete实现
+由于只重写了方法劫持调用变异方法的操作而没有劫持每一项，所以数组的索引和长度直接变化是无法监控到的。
+
+```js
+data:{
+	arr:[1,2,3]
+}
+//不是响应式，不会触发视图更新
+arr[1] = '123'
+arr.length = 2
+//是响应式
+this.$set(arr,1,'123')
+arr.splice(1,1,'123')
+```
+
+需要通过vm.$set、vm.$delete实现，底层也是调用重写的方法，所以不如直接调用重写的splice方法。
 
 ```js
 let obj = { name: 'test', age: 14, n: { num: 123 }, arr: [12, 'wqwq', 2132321] }
@@ -348,6 +513,41 @@ console.log('obj.arr :', obj.arr)
 ### vue3处理
 
 无需另外处理，直接proxy处理，可以直接监测的索引和长度变化
+
+## 依赖收集
+
+概念：
+
+让数据记住自己依赖了哪个模板
+
+数据收集自己的watcher依赖
+
+### Vue2流程
+
+1.模板编译成render
+
+2.$mount组件挂载时render会放入新建的一个watcher，并把这个watcher放到全局（放到Dep.target）。
+
+3.watcher新建时会**调用render函数**，render执行渲染出页面，此时就会取页面上的响应式数据，触发getter，**在getter中属性会记住自己的watcher（就是当前处于全局的watcher），属性就知道自己是处于哪个模板**。
+
+> 属性如何记住自己的watcher：
+>
+> 响应式数据会创建一个dep属性，会调用dep.depend方法记住上面说的放在全局的这个watcher
+>
+> 属性和watcher的对应关系：
+>
+> 一个属性可能在多个组件中使用（vuex数据），所以一个数据可能记住多个watcher。同时一个watcher里会有多个属性。所以是多对多的关系。
+
+4.属性更新时，就可以找到自己的watcher，调用里面的render重新渲染。
+
+> 属性如何找到自己的watcher：
+>
+> 属性变化时会根据dep属性调用dep.notify去通知自己的watcher重新调用render
+
+### vue3流程
+
+- 通过map结构将属性和effect映射
+- effect本身是一个列表，一个数据可能对应多个effect
 
 ## Vue的生命周期
 
@@ -482,135 +682,6 @@ v-model是一个语法糖，可以为表单组件（能修改的视图）做数�
 
 Vue3该语法被移除
 
-## SPA
-
-### SPA与MPA对比
-
-**spa**：单页面应用，由一个主页面和多个单页面片段组成，采用局部刷新，页面切换快。
-
-默认打包后只有一个html页面，并提供一个挂载点，会在此页面中引入对应的js资源。切换页面时通过监听路由变化，渲染对应的页面。
-
-属于客户端渲染（CSR）：浏览器请求获取html、js之后还需要解析获取虚拟dom，转换成真实dom。
-
-seo优化难实现，首屏加载较慢：原因是浏览器请求返回的html里只有一个app节点，没有任何内容，无法seo优化。然后再请求js，浏览器解析后生成真实dom，这样白屏时间较长。
-
-**mpa**：多页应用，由多个html页面组成，采用整页刷新，页面切换速度较慢。
-
-属于服务端渲染SSR：服务端返回完整的html，数据既可以在客户端发送ajax请求获取，也可以在后端获取之后由服务端一并返回（服务端压力较大）。
-
-|     | 单页面应用（SPA） | 多页面应用（MPA） |
-| --- | --- | --- |
-| 组成 | 一个主页面和多个页面片段 | 多个主页面 |
-| 刷新方式 | 局部刷新 | 整页刷新 |
-| url模式 | 哈希模式 | 历史模式 |
-| SEO搜索引擎优化 | 难实现，可使用SSR方式改善 | 容易实现 |
-| 数据传递 | 容易 | 通过url、cookie、localStorage等传递 |
-| 页面切换 | 速度快，用户体验良好 | 切换加载资源，速度慢，用户体验差 |
-| 维护成本 | 相对容易 | 相对复杂 |
-
-### 解决首屏加载速度慢
-
-原因：
-
-1.网络延时
-
-2.资源文件过大
-
-3.资源重复发送请求加载
-
-4.加载脚本时渲染内容堵塞
-
-解决：
-
-1.减小入口文件体积：路由懒加载
-
-2.静态资源本地缓存
-
-前端：使用localstorage
-
-后端：
-
-- 采用`HTTP`缓存，设置`Cache-Control`，`Last-Modified`，`Etag`等响应头
-- 采用`Service Worker`离线缓存
-
-3.UI框架按需加载
-
-4.组件重复打包
-
-进行代码拆分:
-
-假设`A.js`文件是一个常用的库，现在有多个路由使用了`A.js`文件，这就造成了重复下载
-
-解决方案：在`webpack`的`config`文件中，修改`CommonsChunkPlugin`的配置（webpack5是SplitChunksPlugin，开箱即用）
-
-```
-minChunks: 3
-```
-
-`minChunks`为3表示会把使用3次及以上的包抽离出来，放进公共依赖文件，避免了重复加载组件
-
-5.压缩图片
-
-对于所有的图片资源，我们可以进行适当的压缩
-
-对页面上使用到的`icon`，可以使用在线字体图标，或者雪碧图，将众多小图标合并到同一张图上，用以减轻`http`请求压力。
-
-6.开启Gzip压缩
-
-使用compression-webpack-plugin插件，配置webpack
-
-```js
-const CompressionPlugin = require('compression-webpack-plugin')
-
-configureWebpack: (config) => {
-        if (process.env.NODE_ENV === 'production') {
-            // 为生产环境修改配置...
-            config.mode = 'production'
-            return {
-                plugins: [new CompressionPlugin({
-                    test: /\.js$|\.html$|\.css/, //匹配文件名
-                    threshold: 10240, //对超过10k的数据进行压缩
-                    deleteOriginalAssets: false //是否删除原文件
-                })]
-            }
-        }
-```
-
-在服务器我们也要做相应的配置 如果发送请求的浏览器支持`gzip`，就发送给它`gzip`格式的文件 我的服务器是用`express`框架搭建的 只要安装一下`compression`就能使用
-
-```js
-const compression = require('compression')
-app.use(compression())  // 在其他中间件使用之前调用
-```
-
-7.使用SSR
-
-SSR（Server side ），也就是服务端渲染，组件或页面通过服务器生成html字符串，再发送到浏览器
-
-首屏采用服务端渲染的方式，后续采用CSR
-
-8.懒加载
-
-![img](./md-img/68747470733a2f2f7374617469632e7675652d6a732e636f6d2f34666166653930302d336163632d313165622d383566362d3666616337376330633962332e706e67.png)
-
-### 面试题回答整理
-
-1.使用路由懒加载（加载首页时只需要加载首页的路由）、异步组件（使用按需加载），其中、异步组件可以实现组件拆分异步加载，并配合使用webpack分包减少入口文件体积大小
-
-2.骨架屏优化体验
-
-3.抽出公共代码，splitChunks进行代码分割
-
-4.静态资源（其中的打包好的js、css、html）缓存，采用http缓存、使用localstorage实现缓存资源
-
-5.图片资源的压缩，雪碧图、对小图片进行base64减少http请求
-
-6.打包开启gzip压缩处理，使用compression-webpack-plugin插件
-
-7.静态资源使用CDN提速（终极手段，就近访问）
-
-8.SSR服务端渲染（直接得到渲染好的html，不需要请求html后再请求js再对js解析）
-
 ## v-show与v-if
 
 共同点：
@@ -622,9 +693,9 @@ SSR（Server side ），也就是服务端渲染，组件或页面通过服务�
 
 控制手段：v-show隐藏是设置元素样式display:none使元素在页面上**不渲染**，不会占据位置，但dom元素还在。v-if隐藏是**直接删除dom元素**
 
-编译过程：`v-if`切换有一个局部编译/卸载的过程，切换过程中合适地销毁和重建内部的事件监听和子组件，会触发组件的生命周期；`v-show`只是简单的基于css切换，不会触发组件生命周期。
+编译过程：`v-if`切换有一个局部编译/卸载的过程，切换过程中合适地销毁和重建内部的事件监听和子组件，会触发子组件的生命周期；`v-show`只是简单的基于css切换，不会触发组件生命周期。
 
-性能消耗：`v-if`有更高的切换消耗；`v-show`有更高的初始渲染消耗；’
+性能消耗：`v-if`有更高的切换消耗；`v-show`有更高的初始渲染消耗；
 
 v-if比v-show优先级高
 
@@ -676,17 +747,15 @@ template
 
 所以说一般情况下更新数组可以直接用重写的方法即可
 
-3.如果该属性就是对象本身的属性，则直接修改即可
+3.如果该属性就是对象本身的属性，则直接修改即可(本身就是劫持过的，直接修改会调用setter)
 
-4.如果是Vue实例或根数据data时，报错（更新data无意义）
+4.如果是Vue实例或根数据vm.$data时，报错（更新data无意义）
 
-5.如果不是响应式的对象，直接添加属性
+5.如果不是响应式的对象，直接添加属性（_\_ob__属性进行判断是否是响应式对象）
 
-6.如果是其他情况（即响应式对象中添加新属性），直接使用defineReactive将其定义成响应式的
+6.如果是其他情况（即响应式对象中添加新属性），直接使用defineReactive将其定义成响应式的，并通知视图更新（新属性此时会进行依赖收集）
 
-7.通知视图更新
-
-新增属性时，可以考虑使用对象合并的方式（扩展运算符或者Object.assign都行），重新对对象赋值可以进行重新劫持
+新增属性时，可以考虑使用对象合并的方式（扩展运算符或者Object.assign都行），重新对对象赋值是响应式的，对象本身被劫持过。
 
 ```js
 this.obj = { ...this.obj, ...{ b: 111111 } }
@@ -704,19 +773,69 @@ https://github1s.com/vuejs/vue/blob/main/src/core/observer/index.ts
 
 异步要注意竞态问题（竞争条件）：
 
-watchvue3提供了cleanup清理函数，可用于屏蔽上一次的结果（修改上一次回调函数中的变量值）
+watchvue3提供了cleanup清理函数，可用于屏蔽上一次的结果（修改上一次回调函数中的变量值clear）
 
 ![image-20241010112826804](./md-img/image-20241010112826804.png)
 
-watch原理:
+computed和watch都是基于watcher实现，下面标粗的都是使用watcher实现的逻辑。
+
+> vue2watcher是创建时默认立即调用传入的函数expOrFn（除非设置lazy为true懒调用），vue3effect不是立即调用传入的fn
+
+### computed原理
+
+**概述逻辑**：
+
+1.每个计算属性维护一个dirt属性，默认设置dirty:true
+
+2.取值的时候dirty为true就执行方法，获取最新值缓存到this.value,并设置dirty为false
+
+3.再次取值时dirty为false，就直接拿缓存的this.value值
+
+4.当内部依赖（响应式）发生改变时，会设置dirty为true，触发更新，页面重新渲染，获取计算属性值时，发现dirty为true，重新进行计算属性值。
+
+Vue2源码：https://github1s.com/vuejs/vue/blob/main/src/core/instance/state.ts
+
+**vue2源码逻辑**：
+
+> 思考：
+>
+> 1.对vm上定义的计算属性进行劫持重写，get为计算属性函数，用dirty标识和缓存保证只调用一次，计算属性函数、dirty和缓存放入watcher。这里不是计算属性变化触发watcher，而是计算属性访问watcher中的属性，所以不用依赖收集。
+>
+> 2.函数内部属性进行依赖收集计算属性watcher，变化后调用计算属性watcher，改dirty。重新触发计算属性get，计算属性重新访问watcher。
+
+1.计算属性创建时会创建一个计算watcher，计算watcher的evaluate方法就是我们写的计算属性的函数。Object.defineProperty定义vm上该属性的getter函数为evaluate方法，也就是定义成了我们写的计算属性的函数。创建时使用lazy:true,不立即调用evaluate方法。
+
+2.**计算属性本身不进行依赖收集（因为是只读的不会主动发生数据变化，变化要依靠内部依赖）。内部的依赖值（内部的响应式数据）会创建渲染watcher，内部的依赖值会收集计算watcher（用于设置dirty值）和渲染watcher。**
+
+3.创建计算属性时watcher上的dirty初始化为true，初次渲染页面取值计算属性dirty为true触发getter方法求值缓存到this.value，并设置dirty为false。
+
+4.依赖值更新后会通过计算watcher的update方法设置dirty为true，然后调用渲染watcher的render函数重新渲染页面，会导致重新取值计算属性，触发计算属性get，此时dirty为true，调用计算watcher的get函数。
+
+**vue3源码逻辑**：
+
+1.**计算属性内的依赖不会收集渲染effect，而是依赖会收集计算属性effect，计算属性effect收集渲染effect**
+
+### watch原理
+
+**概述逻辑**：
+
+1.**新建一个effect，并放入数据getter函数、回调函数cb**
+
+2.创建watch时调用一次watcher中的getter函数获取oldvalue，并进行依赖收集：响应式数据get触发，数据依赖这个effect。
+
+3.响应式数据变化时再次调用watcher中的getter函数获取newvalue，并调用watcher中的cb，传入odlvalue、newvalue。
+
+Vue3源码：https://github1s.com/vuejs/core/blob/main/packages/reactivity/src/watch.ts
+
+**vue3源码逻辑**：
 
 1.获取数据源和cb回调函数：watch传入一个source和cb函数，source可以是响应式数据或一个getter函数（getter函数每次调用返回一个数据源新值），如果是响应式对象，也会将其转化为一个getter函数，返回source.value作为数据源
 
 2.**新建一个effect**并将getter函数传入构造函数，如果调用effect.run方法，将会调用getter函数，返回数据源最新的值。新建一个job函数赋值给effect.scheduler，job函数中有efftct.run方法的调用、cb回调函数的调用。将这个effect放到全局。
 
-3.初始化watch时运行一次efftct.run方法，其中调用了getter函数获取oldValue，获取响应式数据的值会触发其get方法，get中触发track方法，track将响应式对象和全局的这个effect关联到一个Map中（这个map的结构是：target->放多个effect的Map）。这个过程就是effect对这个getter方法返回的数据源中的响应式对象进行了**依赖收集**。
+3.初始化watch时运行一次effect.run方法，其中调用了getter函数获取oldValue，获取响应式数据的值会触发其get方法，get中触发track方法，track将响应式对象和全局的这个effect关联到一个Map中（这个map的结构是：target->放多个effect的Map）。这个过程就是effect对这个getter方法返回的数据源中的响应式对象进行了**依赖收集**。
 
-4.当响应式数据发生变化时，会触发响应式数据的set方法，set方法调用trigger方法，trigger方法会从Map中获取响应式数据对应的effect Map，遍历执行所有effect的effect.trigger函数。调用effect.trigger函数，trigger函数调用effect.scheduler即job。job函数会调用efftct.run方法获取newValue，调用cb函数，并将newValue和之前的oldValue一起赋值给cb函数
+4.当响应式数据发生变化时，会触发响应式数据的set方法，set方法调用trigger方法，trigger方法会从Map中获取响应式数据对应的effect Map，遍历执行所有effect的effect.trigger函数。调用effect.trigger函数，trigger函数调用effect.scheduler即job。job函数会调用effect.run方法获取newValue，调用cb函数，并将newValue和之前的oldValue一起赋值给cb函数
 
 ## ref和reactive区别
 
@@ -729,6 +848,22 @@ ref如果包对象，底层采用reactive处理对象
 reactive对象包ref，如果reactive对象不是数组，则底层会自动对ref进行解包操作（自动ref.value）
 
 ## watch和watchEffect区别
+
+## vue观察者模式
+
+![image-20241114214530471](./md-img/image-20241114214530471.png)
+
+**响应式数据**来自数据劫持或者代理，watcher和effect来自**模板编译**
+
+响应式数据是被观察目标，watcher和effect是观察者。watcher提供具体逻辑（render函数、计算属性方法、watch的getter方法和回调函数），注册到响应式数据中（数据访问时调用get函数进行**依赖收集**），这就形成了watcher对数据的观察。当响应式数据变化时，会触发注册的watcher中的方法。
+
+watcher也会为数据收集一些工具属性和方法，数据可以去访问watcher获取，这个不用依赖收集。
+
+watcher和effect种类：
+
+- 渲染watcher
+- 计算属性watcher
+- 用户watcher
 
 ## template 到 render 的过程(编译时模板编译过程)
 

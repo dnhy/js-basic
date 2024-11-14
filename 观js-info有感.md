@@ -837,3 +837,17 @@ try {
 }
 ```
 
+## HTTPS中不能加载HTTP内容
+
+原因：这属于混合内容，浏览器要么对混合内容中的**可升级内容**将其升级为HTTPS，要么对**可阻止内容**进行阻止。
+
+HTTP中可以加载HTTPS内容，这不属于混合内容，浏览器不会阻止。
+
+https://blog.csdn.net/lee_slly/article/details/125908055
+
+https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content
+
+### 如何让HTTPS中加载HTTP内容
+
+使用可升级的元素加载HTTP内容
+
