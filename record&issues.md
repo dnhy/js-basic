@@ -1083,6 +1083,38 @@ https://zh.javascript.info/fetch
 
 3、defineProps、defineEmits、defineModel不能在setup函数中使用。需要使用选项式api
 
+4、为什么date的foo属性不会进行依赖收集
+
+```ts
+let date = reactive<any>({ foo: 12121 })
+let bar = reactive<any>({ test: 'a new test' })
+
+watch(
+  () => {
+    date.foo// ?
+
+    return bar.test
+  },
+  () => {
+    console.log('invoke cb')
+  }
+)
+
+watchEffect(() => {
+  date.foo
+  bar.test
+
+  console.log('invoke watchEffect')
+})
+
+setTimeout(() => {
+  date.foo = 22323
+  //   bar.test = '12211'
+})
+```
+
+
+
 ##  ts引入原生类型规范事件名称
 
 这种方式可以在编译时捕获错误，避免了在运行时出现无效的事件名称。同时，它还提供了代码补全和类型检查的支持，使开发过程更加安全和高效。

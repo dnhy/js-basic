@@ -544,6 +544,8 @@ console.log('obj.arr :', obj.arr)
 >
 > 属性变化时会根据dep属性调用dep.notify去通知自己的watcher重新调用render
 
+vue2源码：https://github1s.com/vuejs/vue/blob/main/src/platforms/web/runtime/index.ts#L41
+
 ### vue3流程
 
 - 通过map结构将属性和effect映射
@@ -799,21 +801,31 @@ Vue2源码：https://github1s.com/vuejs/vue/blob/main/src/core/instance/state.ts
 
 > 思考：
 >
-> 1.对vm上定义的计算属性进行劫持重写，get为计算属性函数，用dirty标识和缓存保证只调用一次，计算属性函数、dirty和缓存放入watcher。这里不是计算属性变化触发watcher，而是计算属性访问watcher中的属性，所以不用依赖收集。
+> 计算属性依赖计算属性watcher，内部数据依赖计算属性watcher且依赖用了计算属性的模板的渲染watcher
 >
-> 2.函数内部属性进行依赖收集计算属性watcher，变化后调用计算属性watcher，改dirty。重新触发计算属性get，计算属性重新访问watcher。
+> 依赖收集不一定非要使用属性的dep去关联全局的Dep.target中的watcher或用map把属性和全局的activeSub中的watcher关联起来，可以使用其他方式去对应，比如数组、数据的实例属性等，但都是访问响应式数据调用get方法时进行的
 
-1.计算属性创建时会创建一个计算watcher，计算watcher的evaluate方法就是我们写的计算属性的函数。Object.defineProperty定义vm上该属性的getter函数为evaluate方法，也就是定义成了我们写的计算属性的函数。创建时使用lazy:true,不立即调用evaluate方法。
+1.数据加载阶段
 
-2.**计算属性本身不进行依赖收集（因为是只读的不会主动发生数据变化，变化要依靠内部依赖）。内部的依赖值（内部的响应式数据）会创建渲染watcher，内部的依赖值会收集计算watcher（用于设置dirty值）和渲染watcher。**
+计算属性创建时会创建一个计算watcher并立即放到全局Dep.target，计算属性watcher的evaluate方法就是调用我们写的计算属性的函数。
 
-3.创建计算属性时watcher上的dirty初始化为true，初次渲染页面取值计算属性dirty为true触发getter方法求值缓存到this.value，并设置dirty为false。
+通过Object.defineProperty定义vm上该计算属性的getter函数为调用watcher的evaluate方法，也就是会调用我们写的计算属性的函数。创建watcher时使用lazy:true,不立即调用我们传入的getter方法。
 
-4.依赖值更新后会通过计算watcher的update方法设置dirty为true，然后调用渲染watcher的render函数重新渲染页面，会导致重新取值计算属性，触发计算属性get，此时dirty为true，调用计算watcher的get函数。
+2.组件挂载阶段，如果计算属性在模板上使用了
 
-**vue3源码逻辑**：
+**内部的依赖值（内部的响应式数据）会收集计算watcher（用于设置dirty值）和组件渲染watcher：**组件挂载时渲染watcher后也会立即放到全局，加入到全局数组中（数组中此时有计算属性watcher和组件渲染watcher），渲染页面时会访问到模板上的计算属性，访问时根据属性名找到自己的watcher，从而调用对应watcher的evaluate方法，也就是我们提供的方法，来访问内部的响应式数据，他们调用get方法通过自身的Dep对象收集这两个全局的watcher。
 
-1.**计算属性内的依赖不会收集渲染effect，而是依赖会收集计算属性effect，计算属性effect收集渲染effect**
+**计算属性被访问时会收集自己的计算属性watcher：**是通过vm实例的_computedWatchers数组保存每个计算属性的watcher，通过计算属性名关联属性和watcher。读取计算属性时就会触发对应watcher的evalute函数。
+
+补充：以上两个阶段中，创建计算属性时watcher上的dirty初始化为true，组件挂载初次渲染页面取值计算属性dirty为true触发evaluate方法求值缓存到this.value，并设置dirty为false。再次获取计算属性时，还是会触发evaluate方法，由于此时dirty为false，直接使用缓存值。
+
+3.组件更新阶段
+
+内部依赖值更新后会通过收集的计算属性watcher的update方法设置dirty为true，然后调用渲染watcher的render函数重新渲染页面，会导致重新取值计算属性，触发计算属性getter，此时dirty为true，调用对应的计算属性watcher的evaluate函数（我们提供的方法）获取新的值。
+
+**vue3源码逻辑**不同之处：
+
+1.**计算属性内的依赖不会收集渲染effect，而是会收集计算属性effect，计算属性effect再去收集用了计算属性的模板的渲染effect**，**计算属性会收集自己的计算属性effect**
 
 ### watch原理
 
@@ -825,13 +837,19 @@ Vue2源码：https://github1s.com/vuejs/vue/blob/main/src/core/instance/state.ts
 
 3.响应式数据变化时再次调用watcher中的getter函数获取newvalue，并调用watcher中的cb，传入odlvalue、newvalue。
 
-Vue3源码：https://github1s.com/vuejs/core/blob/main/packages/reactivity/src/watch.ts
+**vue2源码逻辑**：
+
+Vue2源码：https://github1s.com/vuejs/vue/blob/main/src/core/instance/state.ts#L68
+
+每个watch会有一个getter和一个回调cb，创建一个watcher传入这两个函数，创建watcher时会运行get函数将自己放到全局Dep.target，并调用getter。getter中的响应式数据会进行依赖收集，收集这个全局Dep.target中的watcher。每次数据变化都会调用watcher中update，update会调用run，最终就会调用cb函数。
 
 **vue3源码逻辑**：
 
+Vue3源码：https://github1s.com/vuejs/core/blob/main/packages/reactivity/src/watch.ts
+
 1.获取数据源和cb回调函数：watch传入一个source和cb函数，source可以是响应式数据或一个getter函数（getter函数每次调用返回一个数据源新值），如果是响应式对象，也会将其转化为一个getter函数，返回source.value作为数据源
 
-2.**新建一个effect**并将getter函数传入构造函数，如果调用effect.run方法，将会调用getter函数，返回数据源最新的值。新建一个job函数赋值给effect.scheduler，job函数中有efftct.run方法的调用、cb回调函数的调用。将这个effect放到全局。
+2.**新建一个effect**并将getter函数传入构造函数，如果调用effect.run方法，将会调用getter函数，返回数据源最新的值。调用run方法也会把当前创建的这个effect放到全局activeSub。新建一个job函数赋值给effect.scheduler，job函数中有efftct.run方法的调用、cb回调函数的调用。
 
 3.初始化watch时运行一次effect.run方法，其中调用了getter函数获取oldValue，获取响应式数据的值会触发其get方法，get中触发track方法，track将响应式对象和全局的这个effect关联到一个Map中（这个map的结构是：target->放多个effect的Map）。这个过程就是effect对这个getter方法返回的数据源中的响应式对象进行了**依赖收集**。
 
@@ -841,35 +859,136 @@ Vue3源码：https://github1s.com/vuejs/core/blob/main/packages/reactivity/src/w
 
 reactive处理代理对象，通过代理对象进行数据劫持，底层是new Proxy()
 
-ref处理原始类型，会将原始数据类型包装成对象，然后采用的是Object.defineProperty()对这个对象进行数据劫持
+源码：https://github1s.com/vuejs/core/blob/main/packages/reactivity/src/reactive.ts#L92-L93
+
+ref处理原始类型，会将原始数据类型包装成RefImpl对象，然后采用的是Object.defineProperty()对这个对象进行数据劫持（其实使用的是类的getter和setter函数）
+
+源码：https://github1s.com/vuejs/core/blob/main/packages/reactivity/src/ref.ts#L108-L109
 
 ref如果包对象，底层采用reactive处理对象
 
 reactive对象包ref，如果reactive对象不是数组，则底层会自动对ref进行解包操作（自动ref.value）
 
+```ts
+const a = ref(123)
+console.log('a._value :', a.value)
+
+// reactive处理就是创建一个代理对象
+const b = reactive({ test: 1111 })
+console.log('b :', b)
+
+// ref中包普通对象，对象自动转成reactive
+const obj = ref({ foo: 'qwqqw' })
+console.log('obj :', obj)
+
+// ref中包reactive，对象自动转成reactive，但已经是reactive了不处理
+const rct = reactive({ bar: 12112 })
+const obj2 = ref(rct)
+console.log('obj2 :', obj2.value.bar)
+
+// reactive中包ref,reactive代理了ref，代理对象取value就是取的ref的value，拿到的是数字
+const refv = ref(123)
+const obj3 = reactive(refv)
+console.log('obj3 :', obj3.value)
+
+// reactive中包ref，读取属性时如果判断属性值是ref，会自动解包
+//https://github1s.com/vuejs/core/blob/main/packages/reactivity/src/baseHandlers.ts#L120-L121
+const refv2 = ref(123)
+const obj4 = reactive({ age: refv2 })
+console.log('obj4 :', obj4)
+
+// reactive如果是数组,取索引值判断是ref也不解包
+const obj5 = reactive<any>([1, '2112', refv2])
+console.log('obj5 :', obj5)
+console.log(obj5[2].value)
+```
+
 ## watch和watchEffect区别
 
-## vue观察者模式
+使用：
+
+需要自动追踪多个响应式数据且不需要额外操作适合使用watchEffect，需要额外的回调cb进行其他操作使用watch
+
+注意：
+
+watch如果传入一个reactive处理的对象，对象内部的所有层级属性都会绑定effect（使用了reactiveGetter方法进行了所有属性的遍历），但是对象本身不会绑定，所以如果对象重新赋值无法触发cb
+
+```js
+let date = reactive<any>({ foo: 12121 })
+watch(date, () => {
+  console.log('invoke cb')//不会打印
+})
+
+setTimeout(() => {
+  date = 1111
+})
+```
+
+下面的写法也不会打印，调用getter之后访问的是date，不是内部的属性，不会进行依赖收集。因为对象代理之后是访问对象内部的属性时添加操作逻辑。
+
+```typescript
+let date = reactive<any>({ foo: 12121 })
+watch(
+  () => date,
+  () => {
+    console.log('invoke cb')//不会打印
+  }
+)
+
+setTimeout(() => {
+  date.foo = 22323
+  date = 2333
+})
+```
+
+下面的写法只有date的foo属性会进行依赖收集
+
+```ts
+let date = reactive<any>({ foo: 12121, myprop: '1211212'  })
+watch(
+  () => date.foo,
+  () => {
+    console.log('invoke cb')
+  }
+)
+
+setTimeout(() => {
+  date.foo = 22323//打印
+  date.myprop = '12112'//不打印
+})
+```
+
+原理：
+
+watchEffect立即运行一个getter函数，然后追踪它内部的依赖（内部的响应式数据），并进行依赖收集关联这些数据和当前ReactiveEffect中的schedule，当这些依赖改变时运行schedule，schedule内部会重新运行getter函数。
+
+watch第一个是getter，第二个是用户回调cb，先运行getter返回内部的响应式数据，该数据进行依赖收集关联这个响应式数据和当前ReactiveEffect中的schedule，当这些依赖改变时运行schedule，schedule内部会运行getter和cb，两次运行getter获取旧址和新值，传给cb。
+
+![image-20241115161143130](./md-img/image-20241115161143130.png)
+
+
+
+## 总结篇: vue观察者模式
 
 ![image-20241114214530471](./md-img/image-20241114214530471.png)
 
 **响应式数据**来自数据劫持或者代理，watcher和effect来自**模板编译**
 
-响应式数据是被观察目标，watcher和effect是观察者。watcher提供具体逻辑（render函数、计算属性方法、watch的getter方法和回调函数），注册到响应式数据中（数据访问时调用get函数进行**依赖收集**），这就形成了watcher对数据的观察。当响应式数据变化时，会触发注册的watcher中的方法。
-
-watcher也会为数据收集一些工具属性和方法，数据可以去访问watcher获取，这个不用依赖收集。
+响应式数据是被观察目标，watcher和effect是观察者。watcher提供具体逻辑（render函数、计算属性方法、watch的getter方法和回调函数），注册到响应式数据中（数据访问时调用get函数进行**依赖收集**），这就形成了watcher对数据的观察。当响应式数据变化调用set时或其他相关触发逻辑发生时，会触发注册的watcher中的方法。
 
 watcher和effect种类：
 
-- 渲染watcher
-- 计算属性watcher
+- 渲染watcher、渲染effect
+- 计算属性watcher、响应式effect（ReactiveEffect）
 - 用户watcher
 
 ## template 到 render 的过程(编译时模板编译过程)
 
-1.template转成**ast语法树**（抽象语法树：用来描述html），通过 parseHTML进行逐词翻译
+html转换为js
 
-2.**静态优化**ast语法树：对静态语法做静态标记 - mark diff来做优化 静态节点会跳过diff操作
+1.template转成**ast语法树**（抽象语法树：用来描述html），通过 parserHTML进行逐词翻译
+
+2.**静态优化**ast语法树：对静态语法做静态标记 - 通过markUp diff来做优化，后续更新静态节点会跳过diff操作
 
 3.将ast语法树转成render函数:遍历语法树通过字符串拼接重新**生成代码**（h函数调用代码），构造一个render函数返回生成的代码（这些代码是h函数的调用，调用结果是返回虚拟dom，所以相当于render函数返回了虚拟dom）
 
@@ -877,7 +996,9 @@ template->ast tree->code->render function
 
 [vue2源码](https://github1s.com/vuejs/vue/blob/main/src/platforms/web/runtime-with-compiler.ts)
 
-该编译过程比较消耗性能，一般编译过程是在构建工具中进行。vue完整版带的编译器也可以编译，但不推荐在运行时使用（注意：vue编译器不是构建工具，只能在运行时使用）。
+[ast编译网站](https://astexplorer.net/)
+
+该编译过程比较消耗性能，一般编译过程是在构建工具中配合vue-loader进行。vue完整版带的编译器也可以编译，但不推荐在运行时使用（注意：vue编译器不是构建工具，只能在运行时使用）。
 
 ## new Vue的过程
 
