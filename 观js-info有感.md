@@ -851,3 +851,33 @@ https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content
 
 使用可升级的元素加载HTTP内容
 
+## url编码
+
+### encodeURI
+
+对URL编码，将URL禁止的字符（如中文）进行编码
+
+适用场景：
+
+对中文字符进行编码
+
+### encodeURIComponent
+
+对URL编码，将URL禁止的字符（如中文）以及`#`，`$`，`&`，`+`，`,`，`/`，`:`，`;`，`=`，`?` 和 `@` 字符进行编码
+
+适用场景：
+
+1.带有&的url、带有&的字符串作为其他url参数传递时，防止打开该url参数里的`&`影响后面参数的获取
+
+2.用整个url生成二维码，编码中文字符、防止打开二维码的地址时带`&`的参数影响后面的参数获取
+
+```js
+//   window.location.href = '/twopage?name=aaa&测试&urlTest=http://baidu.com?test=夏天&roll=qwqw'
+
+window.location.href = `/twopage?name=${encodeURIComponent('aaa&测试')}&urlTest=${encodeURIComponent('http://baidu.com?test=夏天&roll=qwqw')}`
+
+```
+
+### vue路由跳转
+
+自动对`&`进行编码，其他不编码
