@@ -1,8 +1,8 @@
 ajax({
-  type: 'post',
-  dataType: 'json',
+  type: "post",
+  dataType: "json",
   data: {},
-  url: 'https://xxxx',
+  url: "https://xxxx",
   success: function (text, xml) {
     //请求成功后的回调函数
   },
@@ -14,14 +14,14 @@ ajax({
 function ajax(options) {
   const xhr = new XMLHttpRequest();
   options = options || {};
-  options.type = (options.type || 'GET').toUpperCase();
+  options.type = (options.type || "GET").toUpperCase();
   // options.dataType = options.dataType || 'json';
   const params = options.data;
-  if (options.type === 'GET') {
-    xhr.open('GET', options.url, true);
+  if (options.type === "GET") {
+    xhr.open("GET", options.url, true);
     xhr.send(null);
-  } else if (options.type === 'POST') {
-    xhr.open('POST', options.url, true);
+  } else if (options.type === "POST") {
+    xhr.open("POST", options.url, true);
     xhr.send(params);
   }
 
@@ -43,10 +43,10 @@ function ajax(options) {
 
 function ajax(options) {
   const xhr = new XMLHttpRequest();
-  options.dataType = (options.dataType || 'get').toUpperCase();
+  options.dataType = (options.dataType || "get").toUpperCase();
   xhr.open(options.dataType, options.url, true);
-  xhr.setRequestHeader('content-type', 'application/json');
-  xhr.send(options.dataType === 'POST' ? options.params : null);
+  xhr.setRequestHeader("content-type", "application/json");
+  xhr.send(options.dataType === "POST" ? options.params : null);
   xhr.onreadystatechange = () => {
     let status = xhr.status;
     if (xhr.readyState != 4) return;
@@ -60,4 +60,32 @@ function ajax(options) {
   xhr.onerror = () => {
     options.fail && options.fail(xhr.statusText);
   };
+}
+
+function ajax(options) {
+  const xhr = new XMLHttpRequest();
+  options.method = (options.method || "get").toUpperCase();
+  xhr.open(options.method, options.url, true);
+  xhr.setRequestHeader("Content-type", "application/json");
+  xhr.send(options.method === "POST" ? options.body : null);
+
+  // xhr.onreadystatechange((e) => {
+  //   if (xhr.readyState != 4) return false;
+  //   if (xhr.status === 200) {
+  //     options.success && options.success(xhr.response);
+  //   } else {
+  //     options.fail && options.fail(xhr.statusText);
+  //   }
+  // });
+  xhr.onload((e) => {
+    if (xhr.status === 200) {
+      options.success && options.success(xhr.response);
+    } else {
+      options.fail && options.fail(xhr.statusText);
+    }
+  });
+
+  xhr.onerror((err) => {
+    options.fail && options.fail(xhr.statusText);
+  });
 }

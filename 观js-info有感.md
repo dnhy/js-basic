@@ -881,3 +881,51 @@ window.location.href = `/twopage?name=${encodeURIComponent('aaa&测试')}&urlTes
 ### vue路由跳转
 
 自动对`&`进行编码，其他不编码
+
+## for..in
+
+`for..in` 循环遍历的是所有可枚举的（enumerable）属性。
+
+## DOM
+
+整个文档是document节点，但document不是一个元素节点。document下面是html节点，是元素节点。
+
+document访问html节点使用document.documentElement或者document.childNodes[1]
+
+document.body访问body元素
+
+document.head访问head元素
+
+访问所有节点的方式
+
+- childNodes
+- parentNode
+- previousSibling，nextSibling
+- firstChild,lastchild
+- parentNode
+
+访问元素节点的方式
+
+- `children` —— 仅那些作为元素节点的子代的节点。
+- `firstElementChild`，`lastElementChild` —— 第一个和最后一个子元素。
+- `previousElementSibling`，`nextElementSibling` —— 兄弟元素。
+- `parentElement` —— 父元素。
+
+```html
+<body>
+  <div>Users:</div>
+  <ul>
+    <li>John</li>
+    <li>Pete</li>
+  </ul>
+  <!-- <script src="./10.手写promiseAll.js"></script> -->
+  <script>
+    console.log(document.body.children[1].lastElementChild.nextSibling); //#text
+    console.log(document.body.children[1].children[0].previousSibling); //#text
+
+    console.log(document.body.children[1].lastChild.nextSibling); //null
+    console.log(document.body.children[1].childNodes[0].previousSibling); //null
+  </script>
+</body>
+```
+

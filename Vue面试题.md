@@ -572,7 +572,7 @@ vue2源码：https://github1s.com/vuejs/vue/blob/main/src/platforms/web/runtime/
 
 ## Vue的生命周期
 
-### 生命周期选项
+### vue2生命周期
 
 beforeCreate
 
@@ -633,7 +633,11 @@ deactivated
 
 仅针对 KeepAlive 包裹的组件。注册一个回调函数，当组件从 DOM 中被移除时调用
 
-### 生命周期钩子
+### vue3生命周期
+
+- 选项式api生命周期钩子和vue2相同，除了两个destroy改成unmount，和另外新加的三个钩子
+
+- 组合式api钩子如下：
 
 setup组合式api入口钩子，替代onBeforeCreate和onCreated
 
@@ -661,9 +665,11 @@ https://juejin.cn/post/7352075662453702694?searchId=20241007140835FDE0F7079CF74D
 
 1.vue3生命周期将beforDestroy和destroy更改为beforeUnMount和unMounted
 
-2..vue3提供生命周期钩子，都是在生命周期前加on。vue3提供setup组合式API钩子作为组合式api入口，生命周期钩子可以在其中使用。注意setup API本身就代替了onBeforeCreate和onCreated钩子，所以没有这两个钩子。
+2.vue3新提供了2个dev调试钩子，1个SSR生命钩子
 
-3.vue3新提供了2个dev调试钩子，1个SSR钩子
+3.vue3提供组合式api生命周期钩子，都是在生命周期前加on。另外vue3提供setup组合式API钩子作为组合式api入口，生命周期钩子可以在其中使用。注意setup API本身就代替了onBeforeCreate和onCreated钩子，所以没有这两个钩子。
+
+
 
 ![image-20241011173014494](./md-img/image-20241011173014494.png)
 
@@ -1021,9 +1027,11 @@ template->ast tree->code->render function
 
 ## new Vue的过程
 
+main.js中使用new Vue
+
 组件初始化+模板编译逻辑+模板渲染逻辑+响应式更新逻辑+生命周期调用
 
-1、init events进行事件的初始化，init lifecycle初始化组件的父子关系$parent、$children\$root
+1、init events进行事件的初始化，init lifecycle初始化组件的父子关系$parent、$children、$root
 
 调用beforeCreate钩子
 
@@ -1031,7 +1039,9 @@ template->ast tree->code->render function
 
 调用created钩子
 
-3、判断用户是否传递**el属性**，如果传递了vm就调用$mount方法进行挂载，如果没传递需要用户自己手动调用vm.$mount进行挂载；开始挂载时判断用户是否传入**template选项**，如果传入就编译template为render函数（三部曲过程见模板编译过程），未传入就使用el的外部的html（即div id=app中的内容）作为模板。
+3、判断用户是否传递**el属性**，如果传递了vm就自动调用$mount方法进行挂载，如果没传递需要用户自己手动调用vm.$mount进行挂载；开始挂载时判断用户是否传入**template选项**，如果传入就编译template为render函数（三部曲过程见模板编译过程），未传入就使用el的外部的html（即div id=app中的内容）作为模板转换为render函数。也可以直接传入一个render函数。如果使用的是运行时vue，只能传render函数，如果使用完整版vue，可以传模板。
+
+对于其他导入的vue单文件组件，会由vue-loader统一把模板编译成render函数。
 
 调用beforeMount钩子
 

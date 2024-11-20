@@ -6,6 +6,18 @@
     <title>Document</title>
   </head>
   <body>
-    <script src="./10.手写promiseAll.js"></script>
+    <div>Users:</div>
+    <ul>
+      <li>John</li>
+      <li>Pete</li>
+    </ul>
+    <!-- <script src="./10.手写promiseAll.js"></script> -->
+    <script>
+      console.log(document.body.children[1].lastElementChild.nextSibling); //#text
+      console.log(document.body.children[1].children[0].previousSibling); //#text
+
+      console.log(document.body.children[1].lastChild.nextSibling); //null
+      console.log(document.body.children[1].childNodes[0].previousSibling); //null
+    </script>
   </body>
 </html>
