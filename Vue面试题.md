@@ -242,7 +242,7 @@ https://blog.csdn.net/My_wife_QBL/article/details/140171606
 
 优点：
 
-1.Virtual DOM就是用js对象描述真实DOM。由于直接操作DOM性能较差，可将DOM操作转成对象操作，最终通过diff算法比对差异进行更新DOM
+1.Virtual DOM就是用js对象描述真实DOM。由于直接操作DOM性能较差，可将DOM操作转成**对象操作**，最终通过**diff算法比对差异**进行更新DOM
 
 2.虚拟DOM不依赖真实平台环境也可以实现跨平台。
 
@@ -329,6 +329,15 @@ vue3使用Proxy代替Object.defineProperty进行**数据代理**，并对目标�
 vue2对象采用defineReactive，底层是通过**Object.defineProperty**劫持属性，添加get和set函数重写属性（只能对已经存在的属性进行劫持），多层对象通过递归实现；数组采用重写数组的方法来实现。
 
 vue3采用**proxy**
+
+**面试回答**：
+
+vue2如何进行双向绑定？
+
+Vue是采用**数据劫持**结合**发布者-订阅者模式**的方式
+
+1. ‌**数据劫持**‌：Vue2在创建实例时，会通过[Object.defineProperty](https://www.baidu.com/s?rsv_dl=re_dqa_generate&sa=re_dqa_generate&wd=Object.defineProperty&rsv_pq=9f011bcd0003ceca&oq=vue2双向绑定原理问的是什么&rsv_t=f0052iyA9+OqEqIAx5TopJkW09tIP6SzeSAZD7iNQpnn7A607bf6xkdV/WsdHIm9f91GBw&tn=25017023_2_dg&ie=utf-8)方法对data选项中的所有属性进行数据劫持，将每个属性重写为getter和setter，这样当数据被访问或修改时，会触发相应的回调‌。
+2. ‌**发布订阅模式**‌：Vue2使用数据劫持的方式创建[Observer](https://www.baidu.com/s?rsv_dl=re_dqa_generate&sa=re_dqa_generate&wd=Observer&rsv_pq=9f011bcd0003ceca&oq=vue2双向绑定原理问的是什么&rsv_t=f0052iyA9+OqEqIAx5TopJkW09tIP6SzeSAZD7iNQpnn7A607bf6xkdV/WsdHIm9f91GBw&tn=25017023_2_dg&ie=utf-8)（监听器）来监听所有数据的属性变化，并通过[Dep](https://www.baidu.com/s?rsv_dl=re_dqa_generate&sa=re_dqa_generate&wd=Dep&rsv_pq=9f011bcd0003ceca&oq=vue2双向绑定原理问的是什么&rsv_t=f0052iyA9+OqEqIAx5TopJkW09tIP6SzeSAZD7iNQpnn7A607bf6xkdV/WsdHIm9f91GBw&tn=25017023_2_dg&ie=utf-8)（消息订阅器）来收集订阅者Watcher。当数据变化时，Dep会通知所有订阅者（[Watcher](https://www.baidu.com/s?rsv_dl=re_dqa_generate&sa=re_dqa_generate&wd=Watcher&rsv_pq=9f011bcd0003ceca&oq=vue2双向绑定原理问的是什么&rsv_t=f0052iyA9+OqEqIAx5TopJkW09tIP6SzeSAZD7iNQpnn7A607bf6xkdV/WsdHIm9f91GBw&tn=25017023_2_dg&ie=utf-8)），从而更新视图‌。
 
 ### vue2缺陷
 
@@ -432,11 +441,37 @@ console.log(p.n)
 
 代理针对的是对象，代理对象的属性变化可以检测到，往代理对象新增和删除也可以
 
+**面试回答**：
+
+vue2是如何进行双向绑定的？
+
+vue2采用数据劫持和采用发布-订阅模式实现双向绑定，采用Object.defineProperty劫持对象各个属性，重写getter和setter方法。当数据发生变化时触发setter发布消息给订阅者，触发更新函数实现视图更新。多层对象是通过**递归**来实现劫持。
+
+vue2问题
+
+1.使用数据劫持重写对象属性添加getter和setter性能较差
+
+2.新增和删除属性无法监控到，需要通过$set和$delete实现
+
+3.数组不使用数据劫持，会造成性能浪费，需要单独对数组进行处理
+
+4.对ES6中的Map和Set不支持
+
+vue3优化
+
+1.使用proxy代理，性能较好
+
+2.不需要重写数组方法，
+
+3.新增和删除属性可以被监测到
+
+4.可以代理Map和Set
+
 ## vue中如何检测数组的变化
 
 ### vue2处理
 
-数组处于性能原因没有使用defineProperty对数组中每一项进行拦截，而是选择重新数组变异方法（push、shift、pop、splice、unshift、sort、reverse），从而劫持用户调用这些方法的操作，对视图进行更新。数组中如果是对象类型调用这些方法也会递归进行劫持。
+数组出于性能原因没有使用defineProperty对数组中每一项进行拦截，而是选择重写数组变异方法（push、shift、pop、splice、unshift、sort、reverse），从而劫持用户调用这些方法的操作，对视图进行更新。数组中如果是对象类型调用这些方法也会递归进行劫持。
 
 > 变异方法是指能改变原数组的方法
 
@@ -993,7 +1028,7 @@ watch第一个是getter，第二个是用户回调cb，先运行getter返回内�
 
 
 
-## 总结篇: vue观察者模式
+## 总结篇: vue发布订阅模式
 
 ![image-20241114214530471](./md-img/image-20241114214530471.png)
 
@@ -1098,11 +1133,27 @@ main.js中使用new Vue
 
 [源码解读](https://github.com/febobo/web-interview/issues/24)
 
+面试回答：
+
+diff算法过程？
+
+1.diff算法采用同级比较的方式
+
+2.先比较新老节点是否相同，如果不同就删除旧节点创建新节点
+
+3.如果相同再比较新老节点的子节点，如果新节点没有子节点，老节点有子节点，就把子节点删除。如果新节点有子节点，老节点没有子节点，就创建新的节点。
+
+4.如果双方都有子节点，就进行递归遍历比较和更新子节点
+
 ## key的作用
+
+> 注意：创建dom节点的开销>更新dom节点的开销>移动dom节点的开销
+>
+> diff算法：尽可能复用dom本身去选择去更新，而不去移动dom
 
 diff算法对比新旧vnode，会尽可能就地修改/复用相同类型的元素，但是这种算法可能会导致一些问题，需要使用key去决定到底是修改还是复用元素，还是直接创建新元素。
 
-比如两个input切换时，仅仅是type属性不同，如果不使用key，切换时会将原来的input dom元素直接修改type属性，而value值相同。使用了key可以销毁原来的input，生成一个新的input。
+比如两个input切换时，仅仅是type属性不同，如果不使用key，切换时会将原来的input dom元素直接修改type属性，而用户输入的value值相同。使用了key可以销毁原来的input，生成一个新的input。
 
 不传key默认key是undefined
 
@@ -1110,9 +1161,11 @@ key作用：
 
 1.diff算法中通过key判断两个节点是否是相同节点，如果是相同节点，则进行复用（samevnode方法中使用key和tag对比新旧vnode）
 
-2.进行预期的dom更新：如渲染列表时，vue会采用就地更新的策略，如中间插入元素时，会更改每个元素的值，并在末尾新建一个元素后插入，有key时diff算法会复用已有元素，直接可以插入元素后移动列表原有的元素。
+2.进行预期的dom更新：如渲染列表时，vue会采用就地更新的策略，如中间插入元素时，**会更改每个元素的值，并在末尾新建一个元素后插入**，有key时diff算法会复用已有元素，直接可以插入元素后移动列表原有的元素。
 
 ![image-20241012103413474](./md-img/image-20241012103413474.png)
+
+
 
 3.注意尽量不要使用index作为key
 
@@ -1125,6 +1178,18 @@ div:   	a          b       c  d  e
 index：0 1(新元素)    2  3  4  5（新建一个e元素插入）
 
 div:	   a          f        b  c  d  e
+
+**面试回答**：
+
+key的作用/为什么必须要写key？
+
+key可以在**diff算法中比较两个节点是否相同**。diff算法会尽量的复用原有节点，有时候这样更新会产生问题，需要使用key去决定diff算法中是否创建还是复用元素，所以**key可以保证进行预期的dom更新**（举例input、列表元素插入）。
+
+为什么尽量不要使用index作为key？
+
+diff算法列表会采用就地更新的策略，比较节点通过tag和key判断是否是相同节点。key使用index会在插入节点时判断插入位置和其后面的节点为相同的节点，而直接按照新的vnode的顺序往后更新内容，更新完之后再在尾部插入一个新节点。
+
+这样会导致在列表变化时无法进行预期的节点复用，无法减少dom操作。
 
 ## Vue.use的作用（了解）
 
@@ -1150,13 +1215,13 @@ div:	   a          f        b  c  d  e
 
 VueRouter插件、Vuex插件
 
-## Vue2中vm和vc的区别、Vue.extend作用
+## Vue2中vm和vc的区别、Vue.extend作用（了解）
 
 ### vm和vc的区别
 
 vm是Vue的实例
 
-vc是VueComponent，是Vue.extend产生的，是Vue的子类
+VueComponent，是Vue.extend产生的，是Vue的子类。实例化之后就是vc，也就是每个组件对象。
 
 ### Vue.extend作用
 
@@ -1164,15 +1229,17 @@ vc是VueComponent，是Vue.extend产生的，是Vue的子类
 
 Vue.extend(options)创建了VueComponent构造函数，赋值给Sub，并实现了Sub对Vue的继承。另外Sub上也添加了Vue的extend、mixin、use方法运行进一步扩展使用。Vue.extend最终返回了子类Sub。
 
-用户调用Vue.extend(options)获取Sub构造函数后，new Sub()相当于new Vue(options)，构造函数会调用父类的Vue._init(options)进行实例的初始化和挂载。
+用户调用Vue.extend(options)获取Sub构造函数后，new Sub()相当于new Vue(options)，构造函数会调用父类的Vue._init(options)进行实例的初始化和挂载，并且Sub子类对父类Vue进行了原型链继承。
 
 ### 应用
 
 Vue.extend创建一个组件子类之后，可以手动将这个组件挂载到指定的节点上
 
+![image-20241121104315739](./md-img/image-20241121104315739.png)
+
 ### 补充
 
-Vue.component内部也是Vue.extend，第一个参数会自动使用给定的 `id` 设置组件的名称。第二个参数definition如果是对象，会返回一个组件构造函数。
+Vue.component/directive/filter内部也是Vue.extend，第一个参数会自动使用给定的 `id` 设置组件的名称。第二个参数definition如果是对象，会被Vue.extend包裹返回一个组件构造函数。
 
 > vue3可以使用render函数挂载组件到节点上
 
@@ -1180,9 +1247,11 @@ Vue.component内部也是Vue.extend，第一个参数会自动使用给定的 `i
 
 1.根实例对象（vm）的data既可以是对象也可以是函数
 
-2.组件实例对象的data必须是函数
+2.组件实例对象（vc）的data必须是函数
 
-如果是对象，会导致不同组价数据共享，因为options(内部存在data对象)是挂在组件构造函数Sub上的（类似类的静态属性），不同实例的data会共享这个对象
+如果是对象，会导致不同组件实例对象之间**共用一个data**，产生**数据污染**。所以需要通过**工厂函数**使每个组件都返回**全新的data**作为组件的数据源。
+
+因为options(内部存在data对象)是挂在组件构造函数Sub上的（类似类的静态属性），不同实例的data会共享这个对象
 
 ```js
 Sub.options=options
@@ -1543,3 +1612,15 @@ history切换页面本身需要时向服务器发送请求整体页面，但vue-
 ## vuex的module
 
 项目庞大，对状态进行划分
+
+## vue3的tree-shaking
+
+webpack项目打包时只要是引入的模块都会进行打包，比如`import { fn } from 'ModuleA'`会将整个ModuleA都打包到结果文件中。
+
+如果开启了tree-shaking，那么只会将其中的fn方法打包进去。
+
+vue3由于将全局API进行模块化拆分，支持了这样的按需引入方式，比如使用`import { ref } from 'vue'`。再配合打包工具开启tree-shaking，就不会将整个vue模块都进行打包，只打包按需引入的ref，减小了打包文件体积。
+
+vue2不太支持按需引入，所有的方法都在Vue以及Vue的实例上，所以无法使用tree-shaking进行优化
+
+参考：https://blog.csdn.net/weixin_42554191/article/details/141298319
