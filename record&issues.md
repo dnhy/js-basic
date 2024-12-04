@@ -1477,3 +1477,11 @@ https://blog.51cto.com/u_11990719/3100194
 
 https://zhuanlan.zhihu.com/p/139181285
 
+## vue挂载节点
+
+vue2是替换，vue3是插入
+
+## this
+
+this定义时不知道指向，要到运行之前创建执行上下文才会进行this绑定
+

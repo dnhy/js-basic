@@ -670,27 +670,27 @@ deactivated
 
 ### vue3生命周期
 
-- 选项式api生命周期钩子和vue2相同，除了两个destroy改成unmount，和另外新加的三个钩子
+1.**vue3的选项式api生命周期和vue2相同**，除了两个destroy改成unmount，和另外新加的三个钩子
 
-- 组合式api钩子如下：
+2.组合式api生命周期钩子如下：
 
-setup组合式api入口钩子，替代onBeforeCreate和onCreated
+​	setup组合式api入口钩子，替代onBeforeCreate和onCreated
 
-onBeforeMount
+​	onBeforeMount
 
-onMounted
+​	onMounted
 
-onBeforeUpdate
+​	onBeforeUpdate
 
-onUpdated
+​	onUpdated
 
-onBeforeUnmount
+​	onBeforeUnmount
 
-onUnmounted
+​	onUnmounted
 
-onActivated
+​	onActivated
 
-onDeactivated
+​	onDeactivated
 
 参考
 
@@ -698,7 +698,7 @@ https://juejin.cn/post/7352075662453702694?searchId=20241007140835FDE0F7079CF74D
 
 ### vue3与vue2生命周期对比
 
-1.vue3生命周期将beforDestroy和destroy更改为beforeUnMount和unMounted
+1.vue3生命周期将beforDestroy和destroyed更改为beforeUnMount和unMounted
 
 2.vue3新提供了2个dev调试钩子，1个SSR生命钩子
 
@@ -710,7 +710,7 @@ https://juejin.cn/post/7352075662453702694?searchId=20241007140835FDE0F7079CF74D
 
 ### 在哪个生命周期发请求
 
-生命周期都是同步执行的，任何钩子都可以，但一般是在created和mounted，vue3组合式api只能在onMounted钩子中发生请求。
+生命周期都是同步执行的，任何钩子都可以，但一般是在created和mounted，vue3组合式api只能在onMounted钩子中发送请求。
 
 ## v-model
 
@@ -887,6 +887,12 @@ Vue2源码：https://github1s.com/vuejs/vue/blob/main/src/core/instance/state.ts
 
 1.**计算属性内的依赖不会收集渲染effect，而是会收集计算属性effect，计算属性effect再去收集用了计算属性的模板的渲染effect**，**计算属性会收集自己的计算属性effect**
 
+**面试回答总结**：
+
+vue2中计算属性中的响应式数据变化了通知计算属性watcher和渲染watcher
+
+vue3中计算属性中的响应式数据变化了通知计算属性effect，计算属性effect通知渲染effect
+
 ### watch原理
 
 **概述逻辑**：
@@ -1034,7 +1040,7 @@ watch第一个是getter，第二个是用户回调cb，先运行getter返回内�
 
 **响应式数据**来自数据劫持或者代理，watcher和effect来自**模板编译**
 
-响应式数据是被观察目标，watcher和effect是观察者。watcher提供具体逻辑（render函数、计算属性方法、watch的getter方法和回调函数），注册到响应式数据中（数据访问时调用get函数进行**依赖收集**），这就形成了watcher对数据的观察。当响应式数据变化调用set时或其他相关触发逻辑发生时，会触发注册的watcher中的方法。
+响应式数据是发布者，watcher和effect是订阅者，dep或map是调度中心。
 
 watcher和effect种类：
 
@@ -1074,7 +1080,7 @@ main.js中使用new Vue
 
 调用created钩子
 
-3、判断用户是否传递**el属性**，如果传递了vm就自动调用$mount方法进行挂载，如果没传递需要用户自己手动调用vm.$mount进行挂载；开始挂载时判断用户是否传入**template选项**，如果传入就编译template为render函数（三部曲过程见模板编译过程），未传入就使用el的外部的html（即div id=app中的内容）作为模板转换为render函数。也可以直接传入一个render函数。如果使用的是运行时vue，只能传render函数，如果使用完整版vue，可以传模板。
+3、判断用户是否传递**el属性**，如果传递了vm就自动调用$mount方法进行挂载，如果没传递需要用户自己手动调用vm.$mount进行挂载；开始挂载时判断用户是否传入**template选项**，如果传入就编译template为render函数（三部曲过程见模板编译过程），未传入就使用el的outerHTML（即div id=app节点本身加上其中的内容）作为模板转换为render函数。也可以直接传入一个render函数。如果使用的是运行时vue，只能传render函数，如果使用完整版vue，可以传模板。
 
 对于其他导入的vue单文件组件，会由vue-loader统一把模板编译成render函数。
 
@@ -1289,11 +1295,21 @@ vue3中的v-memo通过依赖列表的方式控制页面渲染，依赖列表中�
 
 具名插槽，父组件放入插槽的内容已编译完成，子组件的插槽直接找父组件的对应name插槽，用来直接替换。
 
-作用域插槽，父组件将还未完成编译的之后需要放入插槽的内容放入函数中，传入一个参数才会执行。子组件的插槽找到父组件对应name的插槽函数，传入需要的参数，函数返回用这个参数编译完成的内容，替换子组件的插槽位置。
+作用域插槽，父组件将还未完成编译的之后需要放入插槽的内容转化为一个函数，传入一个参数才会执行。子组件的插槽找到父组件对应name的插槽函数，传入需要的参数，函数返回用这个参数编译完成的内容，替换子组件的插槽位置。
 
-总结：普通插槽，实际dom渲染在父级。作用域插槽（拿到父级函数后）实际dom在子组件内部渲染
+**面试回答**:
+
+Vue2：
+
+普通插槽，实际dom**渲染在父级**，然后传入子级替换插槽位置。作用域插槽（拿到父级传入的函数后）实际dom**在子组件内部渲染**，然后替换插槽位置。
 
 注意插槽渲染指的是子组件的slot被替换为实际的dom
+
+vue3：
+
+都是父组件把内部代码编译为函数传入子组件，子组件拿到之后**在子组件内部渲染**，替换插槽位置。
+
+注意：使用template v-slot的都是编译成函数传入子组件，直接写div slot属性的都是直接父组件编译完成传递给子组件替换（slot属性2.6之后已废弃）
 
 应用：
 
@@ -1330,6 +1346,14 @@ if (name) {
 ```js
 $children.filter(item=>item.$options.name==='xxx')
 ```
+
+## 组件是如何解析的
+
+1.先根据name看看是不是自己，如果是就是递归组件
+
+2.不是自己看看有没有该name的注册的组件
+
+3.找全局是否有该name的注册组件
 
 ## 修饰符
 
@@ -1401,15 +1425,31 @@ vue3原理：
 
 把传入的方法变成异步的
 
+**面试题回答**：
+
+vue2逻辑：回调放入异步队列，优雅降级
+
+1.将 nextTick回调函数 和 数据更新后的页面渲染逻辑 按照执行属性依次放入callbacks中（重复的更新逻辑会去重）
+
+2.根据浏览器兼容性进行降级（Promise、MutationObserver、setImmediate、setTimeout），将callbacks放入微任务或宏任务队列中准备执行
+
+3，事件循环到了微任务或宏任务，执行callbacks中的回调
+
+vue3逻辑：直接在同步代码之后异步执行
+
+Vue3 中不在考虑 promise 的兼容性，所以mounted中本身会创建一个promise，nextTick回调放入promise.then。所以 nextTick 的实现原理就是 promise.then 方法，也就是放入微任务队列中异步执行，保证永远是在页面更新后执行。
+
 ### 扩展
 
 event loop宏任务、微任务
+
+参考：https://juejin.cn/post/6844904147804749832
 
 ## keep-alive
 
 概念：
 
-vue的内置组件，能在组件切换过程中缓存组件的实例,组件不会销毁。组件重新激活时通过缓存的实例拿到之前渲染好的DOM进行复用，无需重新生成节点。
+vue的内置组件，能在组件切换过程中缓存组件的实例（实例上有真实dom），组件不会销毁。组件重新激活时通过缓存的实例拿到之前渲染好的DOM进行复用，无需重新生成节点。
 
 属性：
 
@@ -1417,7 +1457,7 @@ include、exclude、max(使用)
 
 LRU缓存淘汰算法：
 
-`keep-alive`的`max`属性，用于限制可以缓存多少组件实例，一旦这个数字达到了上限，在新实例被创建之前，已缓存组件中最久没有被访问的实例会被销毁掉
+`keep-alive`的`max`属性，用于限制可以缓存多少组件实例，一旦这个数字达到了上限，在新实例被创建之前，已缓存组件中最久没有被访问的实例会被销毁掉；每次访问的实例都会被设置成最新的。
 
 应用：
 
@@ -1624,3 +1664,24 @@ vue3由于将全局API进行模块化拆分，支持了这样的按需引入方�
 vue2不太支持按需引入，所有的方法都在Vue以及Vue的实例上，所以无法使用tree-shaking进行优化
 
 参考：https://blog.csdn.net/weixin_42554191/article/details/141298319
+
+## vue3组件通信方式
+
+1.$attrs
+
+2.props
+
+3.emits
+
+4.provide/inject
+
+5.vuex/pinia
+
+6.mitt
+
+7.slot
+
+8.v-model
+
+9.expose/$parent(没有$children,可用provide/inject进行模拟)
+

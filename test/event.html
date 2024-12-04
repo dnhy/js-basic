@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="div">
+      <p id="p">
+        <span id="span">Click Me!</span>
+      </p>
+    </div>
+  </body>
+  <script>
+    var div = document.getElementById("div");
+    var p = document.getElementById("p");
+    var span = document.getElementById("span");
+
+    function onClickFn(event) {
+      var tagName = event.currentTarget.tagName;
+      var phase = event.eventPhase;
+      console.log(tagName, phase);
+    }
+
+    div.addEventListener("click", onClickFn, false);
+    p.addEventListener("click", onClickFn, false);
+    span.addEventListener("click", onClickFn, false);
+  </script>
+</html>

@@ -257,7 +257,9 @@ https://www.zhihu.com/tardis/bd/art/643416626?source_id=1001
 ```js
 export var a =123//export default跟变量声明
 export var b ='wqwqwq'
+//或者
 export {a,b}//这里不是对象，是上面写法的语法糖
+
 export function abc() {}
 
 export default a//export default跟js变量
@@ -360,6 +362,14 @@ export default function () {
 // import-default.js
 import customName from './export-default';
 customName(); // 'foo'
+```
+
+导入export default有两种方式，第二种为第一种的语法糖，本质都是起别名，default必须起别名
+
+```js
+import { default as defImpt } from "./b.js";
+
+import defImpt2 from "./b.js";
 ```
 
 实例：

@@ -929,3 +929,7 @@ document.head访问head元素
 </body>
 ```
 
+## [DOM 节点类](https://zh.javascript.info/basic-dom-node-properties#dom-jie-dian-lei)
+
+使用js去描述dom
+

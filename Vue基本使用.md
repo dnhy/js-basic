@@ -280,3 +280,15 @@ https://blog.csdn.net/weixin_47772925/article/details/136439133
 会导致setup函数必须添加async，导致其返回一个promise,vue默认无法解析promise为组件，解决方法是在该组件外添加一个Suspence标签，表示该组件为异步组件，这样就能解析promise了。
 
 一般不要在setup中使用await，如果需要进行异步操作，可以放到生命周期钩子中。
+
+## reactive和ref选择
+
+原则上一般数据用ref，对象用reactive，对象也可以用ref
+
+ref是把传入的数据包装成一个RefImpl对象，采用类的访问器进行数据劫持，如果对象需要整个替换而不丢失响应式，就使用ref。reactive由于代理只能对属性修改时保持响应式。
+
+参考：https://www.cnblogs.com/meiyanstar/p/18265277
+
+## script setup指定组件name
+
+https://blog.csdn.net/XianZhe_/article/details/134211764
