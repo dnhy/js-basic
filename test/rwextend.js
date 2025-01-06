@@ -1,12 +1,12 @@
 function Animal() {
-  this.name = 'animal';
+  this.name = "animal";
   this.sleep = function () {
-    console.log('sleep eat....');
+    console.log("sleep eat....");
   };
 }
 
 Animal.prototype.eat = function () {
-  console.log('animal eat....');
+  console.log("animal eat....");
 };
 // 原型链继承
 // 实例是子类的实例，也是父类的实例
@@ -45,7 +45,7 @@ Animal.prototype.eat = function () {
 // 既是子类的实例也是父类的实例
 function Cat(name) {
   Animal.call(this);
-  this.name = name || 'Tom';
+  this.name = name || "Tom";
 }
 
 // 使用空函数寄生
@@ -60,5 +60,6 @@ Cat.prototype.constructor = Cat;
 
 // test
 const cat = new Cat();
-console.log('cat :', cat);
+console.log("cat :", cat);
 console.log(cat instanceof Animal);
+console.log(Cat.prototype.__proto__ === Animal.prototype);

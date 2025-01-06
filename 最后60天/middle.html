@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <!-- <div class="parent">
+      <div class="child"></div>
+    </div> -->
+    <div class="text">123</div>
+    <p>
+      测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试
+    </p>
+    <p>
+      测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试测试
+    </p>
+  </body>
+  <style>
+    .text {
+      display: inline;
+      background-color: #8aed47;
+      margin: 20px;
+      padding: 20px;
+    }
+    .parent {
+      width: 200px;
+      height: 200px;
+      background-color: aqua;
+      position: relative;
+    }
+    .child {
+      width: 50px;
+      height: 50px;
+      background-color: #8aed47;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      /* margin: -25px -25px; */
+    }
+    p::first-letter {
+      color: #8aed47;
+    }
+    p::after {
+      content: "Hot!";
+    }
+  </style>
+</html>

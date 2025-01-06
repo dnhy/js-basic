@@ -432,3 +432,31 @@ export { foo, bar };
 参考：
 
 https://vue3js.cn/interview/es6/module.html
+
+## 模块规范兼容
+
+**浏览器环境默认只支持ESModule，node环境默认只支持CommonJs**
+
+### 如何兼容
+
+1. 浏览器环境使用script标签时加上type=module，可以使导入的js使用ESModule
+
+```html
+<script type="module" src="./class2.js"></script>
+```
+
+2. webpack默认把ESModule编译成Commonjs并在require上添加相关方法模拟ESModule功能特性，Commonjs编译后不变。两者都会添加运行时代码，使浏览器兼容Commonjs。
+3. node环境可以使用babel-node、webpack使其支持ESModule
+4. 在支持js模块化的浏览器中直接使用ESModule，浏览器引擎中有对ESModule的实现。不支持模块化的浏览器可以通过打包工具实现模块化
+
+https://blog.csdn.net/weixin_44502231/article/details/124133122
+
+### ESModule和Commonjs的区别
+
+1.ES模块规划**导出**的是值的引用（使用getter函数闭包保持对外部值的引用），如果模块内的值发生变化，外部永远取到的是最新的值。Commonjs**导出**的是值本身，模块值的变化，外部取值不会变化。
+
+2.ESModule是编译时加载，必须放在顶部。Commonjs是运行时加载。
+
+3.ESModule只能同步加载，Commonjs支持异步加载。
+
+https://blog.csdn.net/m0_73574455/article/details/144631226

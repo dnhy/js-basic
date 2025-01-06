@@ -396,6 +396,7 @@ js是浏览器脚本语言，通常用于操作dom，多线程会导致dom操作
 - UI rendering/UI事件
 - postMessage、MessageChannel
 - setImmediate、I/O（Node.js）
+- ajax请求
 
 也就是说任务队列会区分宏任务队列，和微任务队列，遇到异步任务会分别放到不同队列
 
@@ -465,6 +466,33 @@ console.log('script end')
 ```
 
 结果：'script start' 'async1 start'  'async2' 'promise1' 'script end' 'async1 end' 'promise2' 'settimeout'
+
+### promise.then什么时候会被放入微任务队列中
+
+当promise对象调用resolve时，then回调才会放入微任务队列
+
+```js
+function testAsy(x){
+   return new Promise(resolve=>{setTimeout(() => {
+       resolve(x);
+     }, 3000)
+    }
+   )
+}
+async function testAwt(){    
+  let result =  await testAsy('hello world');
+  console.log(result);    // 3秒钟之后出现hello world
+  console.log('cuger')   // 3秒钟之后出现cug
+}
+testAwt();
+console.log('cug')  //立即输出cug
+```
+
+1.调用同步代码，执行testAwt，执行testAsy，执行promise中的代码，遇到setTimeout放入宏任务队列，此时promise对象状态不确定（pending），不会将console.log(result);和console.log('cuger')放入微任务队列，由于有await，也会阻塞这两个log的执行，由于使用了async标识，testAwt函数本身不会阻塞外部函数的执行，直接返回一个promise。最后打印cug。
+
+2.查看微任务队列为空，查看宏任务队列，有一个settimeout，等待三秒后执行，执行完成后，promise对象resolove，状态变为fullfilled，将两个log放入微任务队列。
+
+3.查看微任务队列，有一个then回调即两个log，执行它打印result和'cuger'
 
 ## 深浅拷贝
 
@@ -745,3 +773,8 @@ function person() {
 person();
 ```
 
+## 继承
+
+https://www.cnblogs.com/humin/p/4556820.html
+
+注意：获取值时会进行原型链查找，设置值时不会，而是在对象本身设置

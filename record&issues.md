@@ -1329,23 +1329,7 @@ click适合响应用户的快速点击操作、交表单、链接跳转。
 
 https://blog.csdn.net/AllBluefm/article/details/135775722
 
-## js module
 
-**浏览器环境默认只支持ESModule，node环境默认只支持CommonJs**
-
-如何兼容：
-
-1. 浏览器环境使用script标签时加上type=module，可以使导入的js使用ESModule
-
-```html
-<script type="module" src="./class2.js"></script>
-```
-
-2. 可以使用Webpack，Browserify 等工具都能很好将 CommonJS 语法转换为浏览器能理解的语法，比如立即执行函数。
-
-3. node环境可以使用babel-node、webpack使其支持ESModule
-
-https://blog.csdn.net/weixin_44502231/article/details/124133122
 
 ## 观察者模式和发布订阅模式的区别
 
@@ -1484,4 +1468,32 @@ vue2是替换，vue3是插入
 ## this
 
 this定义时不知道指向，要到运行之前创建执行上下文才会进行this绑定
+
+vue和react导入图片方式
+
+react:
+
+https://juejin.cn/post/7395962823500824610
+
+vue：
+
+https://juejin.cn/post/7238200443582955577
+
+vite:
+
+https://cn.vite.dev/guide/assets.html'
+
+```tsx
+function getImageUrl(name: string) {
+	return new URL(`../../assets/${name}`, import.meta.url).href;
+}
+```
+
+必须按照这种格式写，不然build时图片资源	不会打包
+
+## vite+reactrouter路由表配置问题
+
+配置文件需要使用tsx
+
+https://github.com/remix-run/react-router/issues/10003
 

@@ -33,14 +33,14 @@
 
 function myPromise(executor) {
   var self = this;
-  self.status = 'pending';
+  self.status = "pending";
   self.data = undefined;
   self.onResolvedCallback = [];
   self.onRejectedCallback = [];
 
   function resolve(value) {
-    if (self.status === 'pending') {
-      self.status = 'resolved';
+    if (self.status === "pending") {
+      self.status = "resolved";
       self.data = value;
       for (var i = 0; i < self.onResolvedCallback; i++) {
         self.onResolvedCallback[i](value);
@@ -49,8 +49,8 @@ function myPromise(executor) {
   }
 
   function reject(reason) {
-    if (self.status === 'pending') {
-      self.status = 'rejected';
+    if (self.status === "pending") {
+      self.status = "rejected";
       self.data = reason;
       for (var i = 0; i < self.onRejectedCallback; i++) {
         self.onRejectedCallback[i](reason);
@@ -69,19 +69,19 @@ myPromise.prototype.then = function (onResolved, onRejected) {
   var self = this;
   var myPromise2 = null;
   onResolved =
-    typeof onResolved === 'function'
+    typeof onResolved === "function"
       ? onResolved
       : function (value) {
           return value;
         };
   onRejected =
-    typeof onRejected === 'function'
+    typeof onRejected === "function"
       ? onRejected
       : function (reason) {
           return reason;
         };
 
-  if (self.status === 'resolved') {
+  if (self.status === "resolved") {
     return (myPromise2 = new myPromise((resolve, reject) => {
       try {
         var x = onResolved(self.data);
@@ -95,7 +95,7 @@ myPromise.prototype.then = function (onResolved, onRejected) {
     }));
   }
 
-  if (self.status === 'rejected') {
+  if (self.status === "rejected") {
     return (myPromise2 = new myPromise((resolve, reject) => {
       var x = onRejected(self.data);
       if (x instanceof myPromise) {
@@ -105,7 +105,10 @@ myPromise.prototype.then = function (onResolved, onRejected) {
     }));
   }
 
-  if (self.status === 'pending') {
+  if (self.status === "pending") {
+    this.onResolvedCallback.push(onResolved);
+    this.onRejectedCallback.push(onRejected);
+
     return (myPromise2 = new myPromise((resolve, reject) => {}));
   }
 };
@@ -121,8 +124,8 @@ new myPromise((resolve, reject) => {
   .then()
   .then()
   .then((res) => {
-    console.log('res~!!! :', res);
+    console.log("res~!!! :", res);
   })
   .catch((err) => {
-    console.log('[ err22 ] >', err);
+    console.log("[ err22 ] >", err);
   });
