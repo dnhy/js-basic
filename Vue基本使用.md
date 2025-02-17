@@ -292,3 +292,15 @@ ref是把传入的数据包装成一个RefImpl对象，采用类的访问器进�
 ## script setup指定组件name
 
 https://blog.csdn.net/XianZhe_/article/details/134211764
+
+## 模板和jsx对比
+
+模板vue编译时有静态节点标记优化，jsx不会。jsx打包编译更容易
+
+最佳实践：入口用vue，遇到复杂逻辑抽离组件缓存jsx
+
+## 可选链
+
+??:null、undefined才会往后走,false、0、""返回前面的
+
+||:隐式类型转换后为false都往后走

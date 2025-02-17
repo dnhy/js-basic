@@ -193,9 +193,7 @@ Map还可以用Map.prototype.forEach()遍历，Set还可以用Set.prototype.forE
 
 ### 寄生组合继承
 
-##  面试官：你是怎么理解ES6中Module的？使用场景？
-
-### CommonJs
+## CommonJs
 
 exports导出模块的原理是将exports指向module.exports，可以简单的理解为CommonJS在每个模块头部添加了如下代码：
 
@@ -255,17 +253,38 @@ https://www.zhihu.com/tardis/bd/art/643416626?source_id=1001
 ### 基本用法
 
 ```js
+//命名导出
 export var a =123//export default跟变量声明
 export var b ='wqwqwq'
-//或者
-export {a,b}//这里不是对象，是上面写法的语法糖
-
 export function abc() {}
+//或者
+var a = 123;
+var b ='wqwqwq'
+function abc() {}
+export {a,b,abc}//这里不是对象，是上面声明时导出写法的语法糖
 
+
+//默认导出	
 export default a//export default跟js变量
 export default {foo:1221}//这是对象
 export default function abc() {}
+
+//导入并导出整个模块（只适用于命名导出）
+export * from './otherModule';
 ```
+
+```js
+//按需导入
+import { foo, bar } from './module';
+//默认导入
+import myFunction from './module'; // myFunction 是模块的默认导出
+//导入所有内容(包括默认导出和命名导出)
+import * as myModule from './module';
+//混合导入
+import myFunction, { foo, bar } from './module';
+```
+
+### 补充
 
 ES6模块内部默认开启了严格模式
 
@@ -429,13 +448,17 @@ export { foo, bar };
 
 同理能够搭配`as`、`*`搭配使用
 
+只使用于按需导入导出
+
 参考：
 
 https://vue3js.cn/interview/es6/module.html
 
 ## 模块规范兼容
 
-**浏览器环境默认只支持ESModule，node环境默认只支持CommonJs**
+### 适用性
+
+**浏览器环境默认只支持ESModule，node环境默认支持CommonJs和ESModule**
 
 ### 如何兼容
 
@@ -446,12 +469,12 @@ https://vue3js.cn/interview/es6/module.html
 ```
 
 2. webpack默认把ESModule编译成Commonjs并在require上添加相关方法模拟ESModule功能特性，Commonjs编译后不变。两者都会添加运行时代码，使浏览器兼容Commonjs。
-3. node环境可以使用babel-node、webpack使其支持ESModule
+3.  ~~node环境可以使用babel-node、webpack使其支持ESModule~~，node环境可以在package.json中配置"type": "module"表示当前node环境下的这个js是es模块以使其支持esmodule
 4. 在支持js模块化的浏览器中直接使用ESModule，浏览器引擎中有对ESModule的实现。不支持模块化的浏览器可以通过打包工具实现模块化
 
 https://blog.csdn.net/weixin_44502231/article/details/124133122
 
-### ESModule和Commonjs的区别
+## ESModule和Commonjs的区别
 
 1.ES模块规划**导出**的是值的引用（使用getter函数闭包保持对外部值的引用），如果模块内的值发生变化，外部永远取到的是最新的值。Commonjs**导出**的是值本身，模块值的变化，外部取值不会变化。
 
@@ -460,3 +483,77 @@ https://blog.csdn.net/weixin_44502231/article/details/124133122
 3.ESModule只能同步加载，Commonjs支持异步加载。
 
 https://blog.csdn.net/m0_73574455/article/details/144631226
+
+## class
+
+## 类访问器getter/setter
+
+往对象原型上添加getter/setter方法、新的属性。
+
+如果重写的属性和实例属性名相同，则按照原型链查找会使用实例上的属性。
+
+vue3的api，如ref、computed等都使用类访问器添加了value属性
+
+最佳实践：
+
+```js
+class User {
+	_name;//用于存储数据但不访问
+  //name;//这样写会导致类访问器失效，应该通过类访问器访问name属性
+  constructor(name) {
+    // 调用 setter
+      this._name = name;
+  }
+  bar(){}
+  
+  get name() {
+    return this._name+'qqqq';
+  }
+
+  set name(value) {
+    if (value.length < 4) {
+      alert("Name is too short.");
+      return;
+    }
+    this._name = value;
+  }
+}
+
+let user = new User("John");
+user.name//Johnqqqq
+```
+
+### 对比Object.defineProperty的gettter/setter
+
+定义的属性都位于实例上，gettter/setter方法也位于实例上。所以定义的属性如果和原来实例上的属性重名，会进行属性重写覆盖。
+
+其实class的类访问器就是编译成了对obj的原型对象做数据劫持
+
+vue2的数据劫持：
+
+```js
+function defineReactive(obj, key, val) {
+    Object.defineProperty(obj, key, {
+      get() {
+        console.log(`get ${key}:${val}`);
+        return val
+      },
+      set(newVal) {
+        if (newVal !== val) {
+          val = newVal
+          update()
+        }
+      }
+    })
+  }
+```
+
+### 对比proxy
+
+proxy对对象做代理，创建一个新对象接管所有对象属性的新增、修改、删除，属性变化都会走getter和setter。
+
+class的getter/setter在实例原型上定义单个属性和getter/setter。Object.defineProperty在实例上定义单个属性和getter/setter。
+
+## Reflect.get的作用
+
+保证代理对象中访问属性时this都指向代理对象

@@ -1497,3 +1497,267 @@ function getImageUrl(name: string) {
 
 https://github.com/remix-run/react-router/issues/10003
 
+## linux权限配置
+
+```
+sudo chmod 777 /path/to/folder
+```
+
+https://wenda.so.com/q/1681994803216919
+
+## css动画开始时间
+
+页面挂载dom节点，并且浏览器渲染了dom树，才会开始。
+
+页面不挂在dom节点、display:none不渲染dom节点，css动画不会开始
+
+visibility: hidden` 或 `opacity: 0不可见元素，但css动画也开始了
+
+## react控制显隐方式对比
+
+- 如果你的元素包含大量内容或复杂的子元素，并且频繁切换显隐，建议使用 [display](vscode-file://vscode-app/Applications/Visual Studio Code.app/Contents/Resources/app/out/vs/code/electron-sandbox/workbench/workbench.html) 样式控制显隐，以避免频繁的 DOM 操作。
+- 如果你的元素较小且切换显隐不频繁，使用三元表达式控制显隐可能更合适，因为它可以减少内存占用。
+
+## 向元素中插入HTML
+
+安全的做法：直接插入HTML字符串，
+
+```js
+
+// 创建一个新的文本节点
+var textNode = document.createTextNode('这是新插入的文本');
+ 
+// 获取要插入文本的DOM元素
+var targetElement = document.getElementById('targetElementId');
+ 
+// 将文本节点插入到目标元素中
+targetElement.appendChild(textNode);
+
+```
+
+危险的做法：插入解析后的HTML元素，vue使用v-html，react使用dangerouslySetInnerHTML
+
+这会导致xss攻击，用户随意向文档中插入HTML代码
+
+https://blog.csdn.net/txl2498459886/article/details/127213382
+
+## css动画
+
+transition变形动画
+
+给元素自身状态变化的过程中添加过渡动画
+
+animation帧动画
+
+给元素添加处于不同帧的状态和不同状态间的过渡动画
+
+## img和a的元素类型
+
+img是行内元素+可替换元素，不独占一行，可以设置height、width、padding、margin
+
+https://segmentfault.com/a/1190000038989810
+
+a是行内元素
+
+行内元素内部不能包含块元素
+
+## react组件间样式互相影响
+
+- css Modules
+  - 使用后所有的类选择器必须改成style['classname']的形式，以保证使用的是编译后带有唯一标识的类名，其他的写法照旧，打包工具会自动处理css文件给类名添加唯一标识
+  - 注意还是要避免直接使用元素选择器，范围太广，最好借助父子原则器，或者直接给他设置一个className
+  - https://segmentfault.com/a/1190000015738767
+  - https://juejin.cn/post/7097312790511091719
+
+- css in js
+- BEM命名规范---无法彻底隔离样式
+- sass嵌套，顶层类名加上命名空间---无法彻底隔离样式
+- TailwindCSS
+
+https://segmentfault.com/a/1190000021291298
+
+vue可以直接使用scoped，其中如果想让样式进行渗透，可以使用:deep选择器
+
+https://blog.csdn.net/csdn_wzq/article/details/144074098
+
+## 设置滚动条
+
+```css
+::-webkit-scrollbar {
+    opacity: 1;
+    width: 4px;
+    margin-left: 10px;
+  }
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    border-radius: 18px;
+  }
+::-webkit-scrollbar-thumb {
+    background-color: var(--clr-pumpkin);
+    border-radius: 18px;
+  }
+```
+
+## hover只在pc端生效
+
+```
+/* hover只在pc端生效 */
+@media (any-hover: hover) {
+  .nav-link:not(.active):hover {
+    border: 1px solid var(--clr-primar-light);
+  }
+}
+```
+
+## position-fixed和postion-sticky
+
+position-fiexed会导致元素脱离文档流。
+
+设置position-sticky之后可以让div和父元素宽度相同，保持和父元素的关系。
+
+top和left表示能够朝着指定方向自由滚动的距离范围
+
+https://blog.csdn.net/qq_39339179/article/details/143558049
+
+https://blog.csdn.net/qq_39998026/article/details/129303229
+
+## img在div中居中
+
+https://blog.csdn.net/zyy_0725/article/details/78763740
+
+## css需要使用js变量
+
+react
+
+```js
+const circleRef = useRef<SVGCircleElement>(null);
+
+circleRef.current?.style.setProperty(
+      "--stroke-dashoffset",
+      offset.toString()
+    );
+```
+
+vue
+
+可以使用sfc中的v-bind
+
+https://cn.vuejs.org/api/sfc-css-features.html#css-modules
+
+## 兼容safari
+
+1.高度问题
+
+如果页面外部可以滚动，滚动时隐藏导航栏没有遮挡问题
+
+如果设置外部不可滚动，内部可以滚动，则需要设置动态高度100dvh，自动根据页面实际视口高度控制内容高度，并进行兼容处理
+
+https://stackoverflow.com/questions/68094609/ios-15-safari-floating-address-bar/75648985#75648985
+
+![image-20250111194738422](./md-img/image-20250111194738422.png)
+
+```css
+ /* 适配safari内部滚动未自动隐藏导航条自动遮挡问题*/
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+@supports (height: 100dvh) {
+  .container {
+    height: 100dvh; /* 如果支持dvh，则使用dvh */
+  }
+}
+```
+
+还有个方案是使用-webkit-fill-available，但是这个只能在safari上使用，chrome会有问题，所以必须兼容
+
+```css
+.container {
+  display: flex;
+  height: 100vh; /* 默认使用vh */
+}
+
+@supports (-webkit-touch-callout: none) {
+  .container {
+    height: -webkit-fill-available; /* Safari 使用 -webkit-fill-available */
+  }
+}
+
+```
+
+2.ios内部滚动回弹问题	
+
+外部设置为overflow:hidden
+
+```css
+body {
+      background-color: rgb(36, 115, 89);
+      overflow: hidden;
+      .scroll-div {
+        width: 100%;
+        height: 100dvh;
+        overflow-y: scroll;
+        background-color: lightblue;
+      }
+    }
+```
+
+## display和高度
+
+子元素B如果本身没有设置高度，且被其内部的子元素撑开，他的父元素A设置dispaly之后，B元素的高度会被设置为和A元素一样，他内部的元素高度不变，此时可以设置overflow:auto进行滚动
+
+```html
+ <div class="box1">
+      <div class="box2">
+        <div class="box2-in"></div>
+      </div>
+      <div class="box3"></div>
+    </div>
+```
+
+```css
+
+.box1 {
+      height: 300px;
+      background-color: burlywood;
+      display: flex;
+      .box2 {
+        width: 120px;
+        background-color: aquamarine;
+        .box2-in {
+          height: 800px;
+        }
+      }
+      .box3 {
+        width: 120px;
+        background-color: blue;
+      }
+    }
+```
+
+## 拖动api
+
+https://blog.csdn.net/qq_37730829/article/details/118673276
+
+## Array和Set forEach的区别
+
+Array的forEach方法是按照数组的初始长度length去遍历的，如果在遍历过程中的callback修改了元素，也会遍历length个变量。相当于固定了循环长度的for循环，如果不固定长度的for循环，不断添加元素会陷入死循环。
+
+Set的forEach方法是按照元素本身来遍历的，会把Set中的每个元素都变量一遍，过程中callback新增了元素也会继续遍历。
+
+所以Set的forEach会死循环，Array不会。对于set的循环需要拷贝一份。	
+
+https://segmentfault.com/q/1010000043523128
+
+## IP、端口、域名
+
+ip下有很多端口，每个端口都可以关联一个网站页面
+
+其中80端口是给域名的http服务，443端口是给域名的https服务，主域名可以关联一个网站页面，主域名代表ip地址
+
+一个域名可以有多个子域名，每个子域名可以关联一个网站页面，子域名不能代表ip地址。
+
+所以一个域名可以关联多个网站
+
+ 
